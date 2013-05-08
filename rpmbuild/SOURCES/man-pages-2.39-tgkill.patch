@@ -1,0 +1,49 @@
+--- man-pages-2.39/man2/tkill.2.pom	2006-08-03 15:57:17.000000000 +0200
++++ man-pages-2.39/man2/tkill.2	2006-12-08 11:36:52.000000000 +0100
+@@ -25,7 +25,7 @@
+ .\"
+ .TH TKILL 2 "2004-05-31" "Linux 2.6.6" "Linux Programmer's Manual"
+ .SH NAME
+-tkill, tgkill \- send a signal to a single process
++tkill \- send a signal to a single process
+ .SH SYNOPSIS
+ .nf
+ .B #include <sys/types.h>
+@@ -39,10 +39,6 @@
+ .sp
+ .B int tkill(int tid, int sig);
+ .sp
+-.B "_syscall3(int, tgkill, int, tgid, int, tid, int, sig)"
+-          /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+-.sp
+-.B int tgkill(int tgid, int tid, int sig);
+ .fi
+ .SH DESCRIPTION
+ The \fBtkill\fP() system call is analogous to
+@@ -54,11 +50,6 @@
+ With \fBtkill\fP(), however, one can address each process
+ by its unique TID.
+ .PP
+-The \fBtgkill\fP() call improves on \fBtkill\fP() by allowing the caller to
+-specify the thread group ID of the thread to be signalled, protecting
+-against TID reuse. If the tgid is specified as \-1, \fBtgkill\fP() degenerates
+-into \fBtkill\fP().
+-.PP
+ These are the raw system call interfaces, meant for internal
+ thread library use.
+ .SH "RETURN VALUE"
+@@ -76,11 +67,11 @@
+ .B ESRCH
+ No process with the specified thread ID (and thread group ID) exists.
+ .SH "CONFORMING TO"
+-\fBtkill\fP() and \fBtgkill\fP() are Linux specific and should not be used
++\fBtkill\fP() is Linux specific and should not be used
+ in programs that are intended to be portable.
+ .SH VERSIONS
+ \fBtkill\fP() is supported since Linux 2.4.19 / 2.5.4.
+-\fBtgkill\fP() was added in Linux 2.5.75.
+ .SH "SEE ALSO"
+ .BR gettid (2),
+-.BR kill (2)
++.BR kill (2),
++.BR tgkill (2)

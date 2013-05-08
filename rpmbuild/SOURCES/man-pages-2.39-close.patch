@@ -1,0 +1,90 @@
+diff -up man-pages-2.39/man2/close.2.multithread man-pages-2.39/man2/close.2
+--- man-pages-2.39/man2/close.2.multithread	2011-10-20 14:34:48.000000000 +0200
++++ man-pages-2.39/man2/close.2	2011-10-20 14:48:38.436069757 +0200
+@@ -11,7 +11,7 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+@@ -19,7 +19,7 @@
+ .\" have taken the same level of care in the production of this manual,
+ .\" which is licensed free of charge, as they might when working
+ .\" professionally.
+-.\" 
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+@@ -32,7 +32,7 @@
+ .\" Modified 2000-07-22 by Nicol??s Lichtmaier <nick@debian.org>
+ .\"   added note about close(2) not guaranteeing that data is safe on close.
+ .\"
+-.TH CLOSE 2 2001-12-13 "" "Linux Programmer's Manual"
++.TH CLOSE 2 2001-12-13 "Linux" "Linux Programmer's Manual"
+ .SH NAME
+ close \- close a file descriptor
+ .SH SYNOPSIS
+@@ -79,27 +79,53 @@ call was interrupted by a signal.
+ .B EIO
+ An I/O error occurred.
+ .SH "CONFORMING TO"
+-SVr4, 4.3BSD, POSIX.1-2001.  
++SVr4, 4.3BSD, POSIX.1-2001.
+ .\" SVr4 documents an additional ENOLINK error condition.
+ .SH NOTES
+-Not checking the return value of 
++Not checking the return value of
+ .BR close ()
+ is a common but nevertheless
+-serious programming error.  It is quite possible that errors on a
++serious programming error.
++It is quite possible that errors on a
+ previous
+ .BR write (2)
+ operation are first reported at the final
+ .BR close ().
+ Not checking the return value when closing the file may lead to
+-silent loss of data.  This can especially be observed with NFS
++silent loss of data.
++This can especially be observed with NFS
+ and with disk quota.
+ .PP
+ A successful close does not guarantee that the data has been successfully
+-saved to disk, as the kernel defers writes. It is not common for a filesystem
+-to flush the buffers when the stream is closed. If you need to be sure that
++saved to disk, as the kernel defers writes.
++It is not common for a filesystem
++to flush the buffers when the stream is closed.
++If you need to be sure that
+ the data is physically stored use
+ .BR fsync (2).
+ (It will depend on the disk hardware at this point.)
++.PP
++It is probably unwise to close file descriptors while
++they may be in use by system calls in
++other threads in the same process.
++Since a file descriptor may be re-used,
++there are some obscure race conditions
++that may cause unintended side effects.
++.PP
++When dealing with sockets, you have to be sure that there is no
++.BR recv (2)
++still blocking on it on another thread, otherwise it might block forever,
++since no more messages will be sent via the socket. Be sure to use
++.BR shutdown (2)
++to shut down all parts the connection before closing the socket.
++.\" Date: Tue, 4 Sep 2007 13:57:35 +0200
++.\" From: Fredrik Noring <noring@nocrew.org>
++.\" One such race involves signals and ERESTARTSYS. If a file descriptor
++.\" in use by a system call is closed and then reused by e.g. an
++.\" independet open() in some unrelated thread, before the original system
++.\" call has restared after ERESTARTSYS, the original system call will
++.\" later restart with the reused file descriptor. This is most likely a
++.\" serious programming error.
+ .SH "SEE ALSO"
+ .BR fcntl (2),
+ .BR fsync (2),

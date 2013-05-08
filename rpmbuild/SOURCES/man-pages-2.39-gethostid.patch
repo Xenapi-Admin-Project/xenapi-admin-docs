@@ -1,0 +1,18 @@
+diff -up man-pages-2.39/man2/gethostid.2.pom man-pages-2.39/man2/gethostid.2
+--- man-pages-2.39/man2/gethostid.2.pom	2006-08-03 15:57:17.000000000 +0200
++++ man-pages-2.39/man2/gethostid.2	2008-07-08 09:12:30.000000000 +0200
+@@ -67,6 +67,14 @@ but not
+ .BR sethostid ().
+ .SH FILES
+ .I /etc/hostid
++.SH EXAMPLE
++.nf
++id = gethostid ();
++
++/* This is a no-op unless unsigned int is wider than 32 bits.  */ 
++id &= 0xffffffff;
++.fi 
++.in 
+ .SH "SEE ALSO"
+ .BR hostid (1),
+ .BR gethostbyname (3)

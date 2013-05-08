@@ -1,0 +1,11 @@
+--- man-pages-1.51/man1/iconv.1.stdin	2002-06-12 14:44:12.000000000 -0400
++++ man-pages-1.51/man1/iconv.1	2002-06-12 14:44:26.000000000 -0400
+@@ -211,7 +211,7 @@
+ .PP
+ \fB--output\fR, \fB\-o\fR \fIfile\fR
+ .PP
+-Specify output file (instead of stdin)
++Specify output file (instead of stdout)
+ .PP
+ \fB--verbose\fR
+ .PP

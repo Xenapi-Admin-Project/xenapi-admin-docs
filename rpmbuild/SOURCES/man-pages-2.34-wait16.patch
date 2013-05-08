@@ -1,0 +1,11 @@
+--- man-pages-2.34/man2/wait.2.16bit	2006-07-18 08:36:25.000000000 +0200
++++ man-pages-2.34/man2/wait.2	2006-07-20 10:37:00.000000000 +0200
+@@ -183,7 +183,7 @@
+ .TP
+ .BI WEXITSTATUS( status )
+ returns the exit status of the child.
+-This consists of the least significant 8 bits of the
++This consists of the least significant 16-8 bits of the
+ .I status
+ argument that the child specified in a call to
+ .BR exit ()

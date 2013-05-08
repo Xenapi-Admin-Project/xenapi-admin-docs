@@ -1,0 +1,11 @@
+--- man-pages-2.39/man2/mmap2.2.pom	2006-08-04 11:41:28.000000000 +0200
++++ man-pages-2.39/man2/mmap2.2	2007-01-12 12:22:21.000000000 +0100
+@@ -50,7 +50,7 @@
+ system call operates in exactly the same way as
+ .BR mmap (2),
+ except that the final argument specifies the offset into the
+-file in units of the system page size (instead of bytes).
++file in 4kB units (instead of bytes).
+ This enables applications that use a 32-bit
+ .I off_t
+ to map

@@ -1,0 +1,14 @@
+--- man-pages-1.60/man5/issue.5.orig	2003-08-28 17:05:14.000000000 -0400
++++ man-pages-1.60/man5/issue.5	2003-08-28 17:05:47.000000000 -0400
+@@ -30,9 +30,9 @@
+ system identification to be printed before the login prompt.  It may
+ contain various \fB@\fP\fIchar\fP and \fB\e\fP\fIchar\fP sequences, if
+ supported by
+-.BR getty (1).
++.BR mingetty (1).
+ .SH FILES
+ /etc/issue
+ .SH "SEE ALSO"
+-.BR getty (1),
++.BR mingetty (1),
+ .BR motd (5)

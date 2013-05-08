@@ -1,0 +1,31 @@
+diff -up man-pages-2.39/man5/proc.5.pom man-pages-2.39/man5/proc.5
+--- man-pages-2.39/man5/proc.5.pom	2006-07-06 14:38:53.000000000 +0200
++++ man-pages-2.39/man5/proc.5	2010-04-23 10:00:09.000000000 +0200
+@@ -374,8 +374,25 @@ The number of jiffies that this process'
+ waited-for children have been scheduled in kernel mode.
+ .TP
+ \fIpriority\fP %ld
+-The standard nice value, plus fifteen.  The value is never negative in
+-the kernel.
++(Explanation for Linux 2.6)
++For processes running a real-time scheduling policy
++.RI ( policy
++below; see
++.BR sched_setscheduler (2)),
++this is the negated scheduling priority, minus one;
++that is, a number in the range \-2 to \-100,
++corresponding to real-time priorities 1 to 99.
++For processes running under a non-real-time scheduling policy,
++this is the raw nice value
++.RB ( setpriority (2))
++as represented in the kernel.
++The kernel stores nice values as numbers
++in the range 0 (high) to 39 (low),
++corresponding to the user-visible nice range of \-20 to 19.
++
++Before Linux 2.6, this was a scaled value based on
++the scheduler weighting given to this process.
++.\" And back in kernel 1.2 days things were different again.
+ .TP
+ \fInice\fP %ld
+ The nice value ranges from 19 (nicest) to \-19 (not nice to others).

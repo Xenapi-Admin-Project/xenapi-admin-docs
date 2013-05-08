@@ -1,0 +1,11 @@
+--- man-pages-2.25/man3/dbopen.3.pom	2006-03-14 12:07:54.000000000 +0100
++++ man-pages-2.25/man3/dbopen.3	2006-03-14 12:10:21.591863712 +0100
+@@ -40,7 +40,7 @@
+ .ft B
+ #include <sys/types.h>
+ #include <limits.h>
+-#include <db.h>
++#include <db_185.h>
+ 
+ DB *
+ dbopen(const char *file, int flags, int mode, DBTYPE type,

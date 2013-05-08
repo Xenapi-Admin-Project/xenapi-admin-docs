@@ -1,0 +1,39 @@
+diff -up man-pages-2.39/man2/getrusage.2.pom man-pages-2.39/man2/getrusage.2
+--- man-pages-2.39/man2/getrusage.2.pom	2010-07-14 04:41:46.000000000 -0400
++++ man-pages-2.39/man2/getrusage.2	2010-07-14 04:55:40.000000000 -0400
+@@ -43,14 +43,28 @@ getrusage \- get resource usage
+ .SH DESCRIPTION
+ .PP
+ .BR getrusage ()
+-returns current resource usages, for a \fIwho\fP
+-of either 
++returns resource usage measures for
++.IR who ,
++which can be one of the following:
++.TP
+ .B RUSAGE_SELF
+-or 
+-.BR RUSAGE_CHILDREN .
+-The former asks for resources used by the current process,
+-the latter for resources used by those of its children
+-that have terminated and have been waited for.
++Return resource usage statistics for the calling process,
++which is the sum of resources used by all threads in the process.
++.TP
++.B RUSAGE_CHILDREN
++Return resource usage statistics for all children of the
++calling process that have terminated and been waited for.
++These statistics will include the resources used by grandchildren,
++and further removed descendants,
++if all of the intervening descendants waited on their terminated children.
++.TP
++.BR RUSAGE_THREAD " (since Linux 2.6.26)"
++Return resource usage statistics for the calling thread.
++.PP
++The resource usages are returned in the structure pointed to by
++.IR usage ,
++which has the following form:
++
+ .PP 
+ .in +0.5i
+ .nf

@@ -1,0 +1,21 @@
+diff -up man-pages-2.39/man2/rt_sigprocmask.2.pom1 man-pages-2.39/man2/rt_sigprocmask.2
+--- man-pages-2.39/man2/rt_sigprocmask.2.pom1	2010-07-23 05:08:07.000000000 -0400
++++ man-pages-2.39/man2/rt_sigprocmask.2	2010-07-23 05:12:24.000000000 -0400
+@@ -36,7 +36,7 @@ long\ \fBsys_rt_sigprocmask\fR\ (int\ \f
+ .SH "DESCRIPTION"
+ 
+ .PP
+-\fBrt_sigprocmask\fR changes the list of currently blocked signals. The \fIset\fR value stores the signal mask of the pending signals. The previous action on the signal is saved in \fIoact\fR. The value of \fIhow\fR indicates how the call should behave; its values are as follows: 
++\fBrt_sigprocmask\fR changes the list of currently blocked signals. The \fIset\fR value stores the signal mask of the pending signals. The previous action on the signal is saved in \fIoset\fR. The value of \fIhow\fR indicates how the call should behave; its values are as follows: 
+ 
+ .TP
+ SIG_BLOCK
+@@ -64,7 +64,7 @@ The set of blocked signals is set to the
+ 
+ .TP
+ -EFAULT
+-An invalid \fIset\fR, \fIact\fR, or \fIoact\fR was specified.
++An invalid \fIset\fR, \fIact\fR, or \fIoset\fR was specified.
+ 
+ .SH "SEE ALSO"
+ 

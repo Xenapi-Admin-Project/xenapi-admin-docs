@@ -1,0 +1,28 @@
+diff -purN man-pages-2.39.ORIG/man5/proc.5 man-pages-2.39/man5/proc.5
+--- man-pages-2.39.ORIG/man5/proc.5	2009-04-22 13:21:32.000000000 -0500
++++ man-pages-2.39/man5/proc.5	2009-04-22 13:23:37.000000000 -0500
+@@ -1132,18 +1132,12 @@ value of 
+ or you will run out of inodes.
+ .TP
+ .I /proc/sys/fs/file-nr
+-This (read-only) file
+-gives the number of files presently opened.
+-It contains three numbers: The number of allocated
+-file handles, the number of free file handles and the maximum
+-number of file handles.  The kernel allocates file handles dynamically, 
+-but it
+-doesn't free them again.  If the number of allocated files is close to the 
+-
+-maximum, you should consider increasing the maximum.
+-When the number of free file handles is
+-large, you've encountered a peak in your usage of file
+-handles and you probably don't need to increase the maximum.
++Historically, the three values in file-nr denoted the number of
++allocated file handles, the number of allocated but unused file
++handles, and the maximum number of file handles. Linux 2.6 always
++reports 0 as the number of free file handles -- this is not an error,
++it just means that the number of allocated file handles exactly
++matches the number of used file handles.
+ .TP
+ .I /proc/sys/fs/inode-max 
+ This file contains the maximum number of in-memory inodes.

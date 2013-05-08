@@ -1,0 +1,13 @@
+--- man-pages-2.39/man2/unimplemented.2.pom	2005-11-02 12:34:24.000000000 +0100
++++ man-pages-2.39/man2/unimplemented.2	2006-10-02 13:37:45.000000000 +0200
+@@ -26,8 +26,8 @@
+ .\"
+ .TH UNIMPLEMENTED 2 2003-02-28 "Linux 2.4" "Linux Programmer's Manual"
+ .SH NAME
+-afs_syscall, break, ftime, getpmsg, gtty, lock, mpx, prof, profil,
+-putpmsg, security, stty, ulimit \- unimplemented system calls
++afs_syscall, break, ftime, getpmsg, gtty, lock, mpx, multiplexer, prof, profil,
++putpmsg, security, stty, ulimit, vserver \- unimplemented system calls
+ .SH SYNOPSIS
+ Unimplemented system calls.
+ .SH DESCRIPTION

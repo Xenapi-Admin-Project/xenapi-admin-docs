@@ -1,0 +1,12 @@
+--- man-pages-2.32/man2/mmap.2.mm	2006-05-06 00:03:05.000000000 +0200
++++ man-pages-2.32/man2/mmap.2	2006-05-15 09:36:56.000000000 +0200
+@@ -58,8 +58,7 @@
+ .IR start .
+ This latter address is a hint only, and is usually specified as 0.
+ The actual place where the object is mapped is returned by
+-.BR mmap (),
+-and is never 0.
++.BR mmap ().
+ .LP
+ The
+ .I prot

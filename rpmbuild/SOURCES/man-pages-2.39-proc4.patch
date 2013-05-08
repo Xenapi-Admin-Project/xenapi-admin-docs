@@ -1,0 +1,11 @@
+diff -up man-pages-2.39/man5/proc.5.pom man-pages-2.39/man5/proc.5
+--- man-pages-2.39/man5/proc.5.pom	2009-10-20 03:14:00.000000000 -0400
++++ man-pages-2.39/man5/proc.5	2009-10-20 03:18:12.000000000 -0400
+@@ -1103,6 +1103,7 @@ entries and the number of free disk quot
+ .I /proc/sys/fs/file-max
+ This file defines
+ a system-wide limit on the number of open files for all processes.
++This limit is not applied to root. 
+ (See also
+ .BR setrlimit (2),
+ which can be used by a process to set the per-process limit,

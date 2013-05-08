@@ -1,0 +1,51 @@
+--- man-pages-1.67/man5/nscd.conf.5.pom	2003-11-11 18:02:18.000000000 +0100
++++ man-pages-1.67/man5/nscd.conf.5	2006-04-12 11:06:55.000000000 +0200
+@@ -118,6 +118,48 @@
+ .IR /etc/hosts .
+ .RE
+ 
++.B reload-count
++.I unlimited|<number>
++.RS
++Sets the number of times a cached record is reloaded
++before it is pruned from the cache.
++Each cache record has a timeout, when that timeout expires,
++nscd will either reload it (query the NSS service again if the data
++hasn't changed), or drop it.
++.RE
++
++.B paranoia
++.I <yes|no>
++.RS
++Enables or disables restart of nscd every 
++.B restart-interval .
++.RE
++
++.B restart-interval
++.I <time in seconds>
++.RS
++Is interval in which nscd is restarted if option 
++.B paranoia 
++is set. The default value is 3600. 
++.RE
++ 
++.B persistent
++.I service <yes|no>
++.RS
++Enables or disables persistent storage of data. 
++Persistent caches are stored on the disk and therefore survive a nscd restart
++or e.g. machine reboot.
++.RE
++
++.B shared
++.I service <yes|no>
++.RS
++Enables or disables database saring among
++nscd clients (by being read-only mmapped in their address space, so the nscd
++client can directly do the lookup and only if an entry is not found there, ask
++nscd over socket to do the lookup).  
++.RE
++
+ .SH "SEE ALSO"
+ .BR nscd (8)
+ .SH AUTHOR

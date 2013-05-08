@@ -1,0 +1,11 @@
+--- man-pages-2.34/man8/nscd.8.pom	2006-07-14 13:24:02.000000000 +0200
++++ man-pages-2.34/man8/nscd.8	2006-07-18 09:36:08.000000000 +0200
+@@ -47,6 +47,8 @@
+ Note that the shadow file is specifically not cached.
+ .BR getspnam (3)
+ calls remain uncached as a result.
++As a result of this behavior there is not possible to change non-nscd user
++to another non-nscd user via su service when nscd is running.
+ 
+ .SH OPTIONS
+ .TP

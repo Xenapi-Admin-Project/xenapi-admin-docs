@@ -1,0 +1,87 @@
+--- man-pages-2.39/man2/clone.2.pom	2006-08-04 10:41:13.000000000 +0200
++++ man-pages-2.39/man2/clone.2	2006-08-24 12:02:22.000000000 +0200
+@@ -34,12 +34,12 @@
+ .\"
+ .TH CLONE 2 2005-05-17 "Linux 2.6" "Linux Programmer's Manual"
+ .SH NAME
+-clone \- create a child process
++clone, clone2 \- create a child process
+ .SH SYNOPSIS
+ .nf
+ .B #include <sched.h>
+ 
+-.BI "int clone(int (*" "fn" ")(void *), void *" child_stack \
++.BI "int clone(int (*" "fn" ")(void *" arg "), void *" child_stack \
+ ", int " flags ", void *" "arg" );
+ 
+ .BI "_syscall2(int, " clone ", int, " flags ", void *, " child_stack )
+@@ -48,20 +48,34 @@
+ .BI "     int *, " parent_tidptr ", struct user_desc *, " newtls ,
+ .BI "     int *, " child_tidptr )
+         /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
++        
++.BI "int __clone2(int (*" fn ")(void *" arg "), void *" child_stack ",
++.BI  "	  size_t " stack_size ", int " flags ", void *" arg ");
++        
++.BI "_syscall2(int, " clone2 ", int, " flags ", void *, " child_stack ", 
++.BI " 	  int, " child_stack_size ", int *, " parent_tidptr ", 
++.BI "	  struct user_desc *, " newtls ", int *, " child_tidptr )
++ 
++ 
+ .fi
+ .SH DESCRIPTION
+-.BR clone ()
++.BR clone () 
++system call can be use on all architectures except IA-64.
++On IA-64 there is available command
++.BR __clone2().
++Both commands has the similar behavior - they
+ creates a new process, in a manner similar to
+-.BR fork (2).
++.BR fork (2). 
+ .BR clone ()
+ is a library function layered on top
+-of the underlying 
++of the underlying
+ .BR clone ()
+ system call, hereinafter referred to as
+-.BR sys_clone .
+-A description of
+-.BR sys_clone
+-is given towards the end of this page.
++.BR sys_clone.
++.BR __clone2()
++is exported from 
++.BR sys_clone2
++system call. 
+ 
+ Unlike
+ .BR fork (2),
+@@ -79,6 +93,17 @@
+ is to implement threads: multiple threads of control in a program that
+ run concurrently in a shared memory space.
+ 
++The behavior of
++.BR __clone2 ()
++is the same as the behavior of
++.BR clone()
++The difference is 
++.BR __clone2()
++has one extra argument 
++.I stack_size
++which is used to determine the size of child stack. Other variables has the same meaning.
++
++
+ When the child process is created with
+ .BR clone (), 
+ it executes the function
+@@ -561,6 +586,9 @@
+ in the caller's context, no child process will be created, and
+ .I errno
+ will be set appropriately.
++
++
++
+ .SH ERRORS
+ .TP
+ .B EAGAIN

@@ -1,0 +1,11 @@
+--- man-pages-1.67/man2/write.2.pom	2002-08-04 14:01:34.000000000 +0200
++++ man-pages-1.67/man2/write.2	2006-04-27 10:55:41.000000000 +0200
+@@ -52,7 +52,7 @@
+ On success, the number of bytes written are returned (zero indicates
+ nothing was written).  On error, \-1 is returned, and \fIerrno\fP is set
+ appropriately.  If \fIcount\fP is zero and the file descriptor refers to
+-a regular file, 0 will be returned without causing any other effect.
++a regular file, 0 may be returned, or an error could be detected.
+ For a special file, the results are not portable.
+ .SH ERRORS
+ .TP

@@ -1,0 +1,11 @@
+--- man-pages-2.34/man2/getrlimit.2.pom	2006-07-18 09:37:33.000000000 +0200
++++ man-pages-2.34/man2/getrlimit.2	2006-07-18 10:23:29.000000000 +0200
+@@ -275,7 +275,7 @@
+ .BR EMFILE .
+ .TP
+ .B RLIMIT_NPROC
+-The maximum number of processes that can be created for the real user
++The maximum number of threads that can be created for the real user
+ ID of the calling process.
+ Upon encountering this limit, 
+ .BR fork ()

@@ -1,0 +1,33 @@
+--- man-pages-1.67/man2/io_submit.2.orig	2006-04-11 10:24:00.000000000 -0400
++++ man-pages-1.67/man2/io_submit.2	2006-04-11 10:24:01.000000000 -0400
+@@ -27,7 +27,7 @@ io_submit \- Submit asynchronous I/O blo
+ .ad l
+ .hy 0
+ 
+-#include <linux/aio.h>
++#include <libaio.h>
+ .sp
+ .HP 16
+ long\ \fBio_submit\fR\ (aio_context_t\ \fIctx_id\fR, long\ \fInr\fR, struct\ iocb\ \fI**iocbpp\fR);
+--- man-pages-1.67/man2/io_getevents.2.orig	2006-04-11 10:24:14.000000000 -0400
++++ man-pages-1.67/man2/io_getevents.2	2006-04-11 10:24:17.000000000 -0400
+@@ -31,7 +31,7 @@ io_getevents \- Read asynchronous I/O ev
+ 
+ .sp
+ 
+-#include <linux/aio.h>
++#include <libaio.h>
+ 
+ .sp
+ .HP 19
+--- man-pages-1.67/man2/io_cancel.2.orig	2006-04-11 10:24:05.000000000 -0400
++++ man-pages-1.67/man2/io_cancel.2	2006-04-11 10:24:09.000000000 -0400
+@@ -27,7 +27,7 @@ io_cancel \- Cancel an outstanding async
+ .ad l
+ .hy 0
+ 
+-#include <linux/aio.h>
++#include <libaio.h>
+ .sp
+ .HP 16
+ long\ \fBio_cancel\fR\ (aio_context_t\ \fIctx_id\fR, struct\ iocb\ \fI*iocb\fR, struct\ io_event\ \fI*result\fR);

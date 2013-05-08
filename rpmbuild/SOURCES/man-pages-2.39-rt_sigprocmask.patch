@@ -1,0 +1,20 @@
+--- man-pages-2.39/man2/rt_sigprocmask.2	2004-05-26 04:47:16.000000000 +0200
++++ man-pages-2.55/man2/rt_sigprocmask.2	2007-06-20 20:06:35.574679000 +0200
+@@ -29,7 +29,7 @@
+ .ad l
+ .hy 0
+ .HP 25
+-long\ \fBsys_rt_sigprocmask\fR\ (sigset_t\ \fI*set\fR, sigset_t\ \fI*oset\fR, size_t\ \fIsigsetsize\fR);
++long\ \fBsys_rt_sigprocmask\fR\ (int\ \fIhow\fR, sigset_t\ \fI*set\fR, sigset_t\ \fI*oset\fR, size_t\ \fIsigsetsize\fR);
+ .ad
+ .hy
+ 
+@@ -60,7 +60,7 @@
+ 
+ .TP
+ -EINVAL
+-\fIsigsetsize\fR was not equivalent to the size of a \fIsigset_t\fR type.
++\fIsigsetsize\fR was not equivalent to the size of a \fIsigset_t\fR type or the value specified in \fIhow\fR was invalid.
+ 
+ .TP
+ -EFAULT

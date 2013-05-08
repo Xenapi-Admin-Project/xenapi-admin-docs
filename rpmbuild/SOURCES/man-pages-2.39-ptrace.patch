@@ -1,0 +1,23 @@
+diff -up man-pages-2.39/man2/ptrace.2.pom man-pages-2.39/man2/ptrace.2
+--- man-pages-2.39/man2/ptrace.2.pom	2006-08-03 15:57:17.000000000 +0200
++++ man-pages-2.39/man2/ptrace.2	2008-07-08 10:50:56.000000000 +0200
+@@ -125,7 +125,7 @@ The word is returned as the result of th
+ .BR ptrace ()
+ call.  
+ Typically the offset must be word-aligned, though this might vary by
+-architecture.  (\fIdata\fP is ignored.)
++architecture. See NOTES. (\fIdata\fP is ignored.)
+ .TP
+ PTRACE_POKETEXT, PTRACE_POKEDATA
+ Copies the word
+@@ -328,7 +328,9 @@ behavior.
+ the process with PID 1, may not be traced.
+ .LP
+ The layout of the contents of memory and the USER area are quite OS- and
+-architecture-specific.
++architecture-specific. The offset supplied and the data returned might
++not entirely match with the definition of
++.I struct user
+ .LP
+ The size of a "word" is determined by the OS variant 
+ (e.g., for 32-bit Linux it's 32 bits, etc.).

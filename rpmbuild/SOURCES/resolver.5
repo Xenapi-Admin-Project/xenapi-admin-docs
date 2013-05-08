@@ -1,0 +1,228 @@
+.\" Copyright (c) 1986 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms are permitted
+.\" provided that the above copyright notice and this paragraph are
+.\" duplicated in all such forms and that any documentation,
+.\" advertising materials, and other materials related to such
+.\" distribution and use acknowledge that the software was developed
+.\" by the University of California, Berkeley.  The name of the
+.\" University may not be used to endorse or promote products derived
+.\" from this software without specific prior written permission.
+.\" THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+.\" IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+.\" WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+.\"
+.\"	@(#)resolver.5	5.9 (Berkeley) 12/14/89
+.\"	$Id: resolver.5,v 8.6 1999/05/21 00:01:02 vixie Exp $
+.\"
+.\"     Revised by Mike MacCana
+.\"
+.Dd June 23, 2004
+.Dt RESOLVER 5 
+.Os BSD 4
+.Sh NAME
+.Nm resolver 
+.Nd DNS client
+.Sh SYNOPSIS
+.Pa /etc/resolv.conf
+.Sh DESCRIPTION
+The
+.Nm resolver
+is the DNS client used on most Linux and BSD systems. It comes with glibc. 
+Its configuration file 
+.Pa /etc/resolv.conf 
+(note the spelling) determines the DNS servers to use, and various other options - see below.
+.Pp
+Almost all machines have a DNS server set up in this file - if it
+doesn't exist, the system will assume there's a DNS server running on the local 
+machine, and work out the search path from the machines domain name.
+.Pp
+The config file is read the first time the DNS client is invoked by a process.
+.Pp
+The different configuration options are:
+.Bl -tag -width "nameserver"
+.It Li nameserver
+IP address of a DNS server to use. Multiple name servers may be listed, each on their own line. The 
+.Nm resolver 
+will use them in order listed - if the first server times out answering the query, the next server will be tried, and so on. If the
+.Li resolver
+runs out out of name servers, the first server will be queried again, until a maximum number of retries are made. 
+.Pp 
+The maximum number of DNS servers to use is set by 
+.Dv MAXNS 
+(see
+.Pa <resolv.h>
+)
+.It Li search
+Domain(s) to use for DNS lookups when no domain is specified. List each domain 
+following the
+.Li search
+keyword with spaces or tabs between them. Each possible domain will be checked in order until a match is found. Note that this process may be slow (queries will time out if no server is available for a domain) and will generate a lot of network traffic if the servers for the listed domains aren't local.
+.Pp
+The search list is currently limited to six domains with a total of 256 characters.
+If
+.Li search
+isn't specified, the search list will be determined from the local domain name (whatever comes after the first dot). If the host name doesn't contain a domain, the root domain is used. 
+.Pp
+By default, it 
+.Li search
+contains only the local domain name.
+.It Li domain
+Local domain name. You can use this instead of the 
+.Li search
+option to specify a single domain to check if a hostname isn't specified. Most people just use 
+.Li search
+instead (that option lets you use multiple servers, 
+.Li domain
+doesn't). You can't use 
+.Li domain
+and
+.Li search
+at the same time - they're mutually exclusive. 
+.Pp
+If
+.Li domain
+isn't specified, the domain will be determined from the local domain name (whatever comes after the first dot). If the host name doesn't contain a domain, the root domain is used.
+.It Li sortlist
+Sorts addresses returned by the
+.Li gethostbyname 
+system call.
+A
+.Li sortlist 
+is specified by IP address netmask pairs. The netmask is
+optional and defaults to the natural netmask of the net. The IP address
+and optional network pairs are separated by slashes. Up to 10 pairs may
+be specified.  For example:
+.Bd -literal -offset indent
+sortlist 130.155.160.0/255.255.240.0 130.155.0.0
+.Ed
+.It Li options
+Allows certain internal 
+.Nm resolver 
+variables to be modified.
+The syntax is
+.D1 Li options Ar option ...
+where 
+.Ar option 
+is one of the following:
+.Bl -tag -width "ndots:n " 
+.It Li debug 
+sets 
+.Dv RES_DEBUG 
+in 
+.Ft _res.options .
+.It Li ndots: Ns Ar n 
+sets a threshold for the number of dots which
+must appear in a name given to 
+.Fn res_query 
+(see 
+.Xr resolver 3 )
+before an 
+.Em initial absolute query 
+will be made.  The default for
+.Ar n 
+is 
+.Dq 1 , 
+meaning that if there are 
+.Em any 
+dots in a name, the name will be tried first as an absolute name before any 
+.Em search list
+elements are appended to it.
+.It Li timeout: Ns Ar n
+sets the amount of time the resolver will wait for a response from a remote
+name server before retrying the query via a different name server.  Measured in
+seconds, the default is
+.Dv RES_TIMEOUT
+(see
+.Pa <resolv.h> ).
+.It Li attempts: Ns Ar n
+sets the number of times the resolver will send a query to its name servers
+before giving up and returning an error to the calling application.  The
+default is
+.Dv RES_DFLRETRY
+(see
+.Pa <resolv.h> ).
+.It Li rotate
+sets
+.Dv RES_ROTATE
+in
+.Ft _res.options ,
+which causes round robin selection of nameservers from among those listed.
+This has the effect of spreading the query load among all listed servers,
+rather than having all clients try the first listed server first every time.
+.It Li no-check-names
+sets
+.Dv RES_NOCHECKNAME
+in
+.Ft _res.options ,
+which disables the modern BIND checking of incoming host names and mail names
+for invalid characters such as underscore (_), non-ASCII, or control characters.
+.It Li inet6
+sets 
+.Dv RES_USE_INET6
+in 
+.Ft _res.options .
+This has the effect of trying a AAAA query before an A query inside the
+.Ft gethostbyname
+function, and of mapping IPv4 responses in IPv6 ``tunnelled form'' if no
+AAAA records are found but an A record set exists.
+.It Li ip6-dotint / no-ip6-dotint
+sets / clears the
+.Dv RES_NOIP6DOTINT
+bit in 
+.Ft _res.options ,
+which when set (ip6-dotint) will enable reverse IPv6 lookups to be made in the (deprecated) 
+ip6.int zone; when clear (no-ip6-dotint), reverse IPv6 lookups are made in the ip6.arpa zone 
+by default.
+.It Li ip6-bytestring
+sets
+.Dv RES_USEBSTRING
+in 
+.Ft _res.options .
+This causes reverse IPv6 lookups to be made using the bit-label 
+format of RFC 2673; if not set, then nibble format is used.
+.El
+.El
+.Pp
+The 
+.Li domain 
+and 
+.Li search 
+keywords are mutually exclusive.
+If more than one instance of these keywords is present,
+the last instance wins.
+.Pp
+The 
+.Li search 
+keyword of a system's 
+.Pa resolv.conf 
+file can be
+overridden on a per-process basis by setting the environment variable
+.Dq Ev LOCALDOMAIN 
+to a space-separated list of search domains.
+.Pp
+The 
+.Li options 
+keyword of a system's 
+.Pa resolv.conf 
+file can be amended on a per-process basis by setting the environment variable
+.Dq Ev RES_OPTIONS to a space-separated list of 
+.Nm resolver 
+options as explained above under 
+.Li options .
+.Pp
+The keyword and value must appear on a single line, and the keyword
+(e.g., 
+.Li nameserver ) 
+must start the line.  The value follows the keyword, separated by white space.
+.Sh FILES
+.Pa /etc/resolv.conf
+.Pa <resolv.h>
+.Sh SEE ALSO
+.Xr gethostbyname 3 , 
+.Xr hostname 7 , 
+.Xr named 8 ,
+.Xr resolver 3 , 
+.Xr resolver 5 .
+.Dq Name Server Operations Guide for Sy BIND

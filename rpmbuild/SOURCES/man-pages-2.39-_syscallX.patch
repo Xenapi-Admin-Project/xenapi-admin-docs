@@ -1,0 +1,1759 @@
+diff -ur man-pages-2.39/man2/clone.2 man-pages-2.55/man2/clone.2
+--- man-pages-2.39/man2/clone.2	2007-06-18 17:16:18.000000000 +0200
++++ man-pages-2.55/man2/clone.2	2007-06-20 18:37:11.000000000 +0200
+@@ -13,7 +13,7 @@
+ .\"     Mostly upgraded to 2.4.x
+ .\"     Added prototype for sys_clone() plus description
+ .\"	Added CLONE_THREAD with a brief description of thread groups
+-.\"	Added CLONE_PARENT and revised entire page remove ambiguity 
++.\"	Added CLONE_PARENT and revised entire page remove ambiguity
+ .\"		between "calling process" and "parent process"
+ .\"	Added CLONE_PTRACE and CLONE_VFORK
+ .\"	Added EPERM and EINVAL error codes
+@@ -32,60 +32,45 @@
+ .\" 2005-05-10, mtk, added CLONE_SYSVSEM, CLONE_UNTRACED, CLONE_STOPPED.
+ .\" 2005-05-17, mtk, Substantially enhanced discussion of CLONE_THREAD.
+ .\"
+-.TH CLONE 2 2005-05-17 "Linux 2.6" "Linux Programmer's Manual"
++.TH CLONE 2 2007-06-01 "Linux 2.6" "Linux Programmer's Manual"
+ .SH NAME
+-clone, clone2 \- create a child process
++clone, __clone2 \- create a child process
+ .SH SYNOPSIS
+ .nf
+ .B #include <sched.h>
+ 
+-.BI "int clone(int (*" "fn" ")(void *" arg "), void *" child_stack \
+-", int " flags ", void *" "arg" );
+-
+-.BI "_syscall2(int, " clone ", int, " flags ", void *, " child_stack )
+-
+-.BI "_syscall5(int, " clone ", int, " flags ", void *, " child_stack ,
+-.BI "     int *, " parent_tidptr ", struct user_desc *, " newtls ,
+-.BI "     int *, " child_tidptr )
+-        /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+-        
+-.BI "int __clone2(int (*" fn ")(void *" arg "), void *" child_stack ",
+-.BI  "	  size_t " stack_size ", int " flags ", void *" arg ");
+-        
+-.BI "_syscall2(int, " clone2 ", int, " flags ", void *, " child_stack ", 
+-.BI " 	  int, " child_stack_size ", int *, " parent_tidptr ", 
+-.BI "	  struct user_desc *, " newtls ", int *, " child_tidptr )
+- 
+- 
++.BI "int clone(int (*" "fn" ")(void *), void *" child_stack ,
++.BI "          int " flags ", void *" "arg" ", ... "
++.BI "          /* pid_t *" pid ", struct user_desc *" tls \
++", pid_t *" ctid " */ );"
++
++.BI "int __clone2(int (*" fn ")(void *),  void *" child_stack_base ,
++.BI "             size_t " stack_size ", int " flags ", void *" arg ", ..."
++.BI "             /* pid_t *" pid ", struct user_desc *" tls \
++", pid_t *" ctid " */ );"
+ .fi
+ .SH DESCRIPTION
+-.BR clone () 
+-system call can be use on all architectures except IA-64.
+-On IA-64 there is available command
+-.BR __clone2().
+-Both commands has the similar behavior - they
+-creates a new process, in a manner similar to
+-.BR fork (2). 
+ .BR clone ()
+-is a library function layered on top
+-of the underlying
++creates a new process, in a manner similar to
++.BR fork (2).
++It is actually a library function layered on top of the underlying
+ .BR clone ()
+ system call, hereinafter referred to as
+-.BR sys_clone.
+-.BR __clone2()
+-is exported from 
+-.BR sys_clone2
+-system call. 
++.BR sys_clone .
++A description of
++.BR sys_clone
++is given towards the end of this page.
+ 
+ Unlike
+ .BR fork (2),
+-these calls 
++these calls
+ allow the child process to share parts of its execution context with
+ the calling process, such as the memory space, the table of file
+-descriptors, and the table of signal handlers.  (Note that on this manual 
+-page, "calling process" normally corresponds to "parent process".  But see
+-the description of 
+-.B CLONE_PARENT 
++descriptors, and the table of signal handlers.
++(Note that on this manual
++page, "calling process" normally corresponds to "parent process".
++But see the description of
++.B CLONE_PARENT
+ below.)
+ 
+ The main use of
+@@ -93,27 +78,16 @@
+ is to implement threads: multiple threads of control in a program that
+ run concurrently in a shared memory space.
+ 
+-The behavior of
+-.BR __clone2 ()
+-is the same as the behavior of
+-.BR clone()
+-The difference is 
+-.BR __clone2()
+-has one extra argument 
+-.I stack_size
+-which is used to determine the size of child stack. Other variables has the same meaning.
+-
+-
+ When the child process is created with
+-.BR clone (), 
++.BR clone (),
+ it executes the function
+ application
+-.IR fn ( arg ).  
++.IR fn ( arg ).
+ (This differs from
+-.BR fork (2), 
++.BR fork (2),
+ where execution continues in the child from the point
+-of the 
+-.BR fork (2) 
++of the
++.BR fork (2)
+ call.)
+ The
+ .I fn
+@@ -125,22 +99,23 @@
+ .I fn
+ function.
+ 
+-When the 
++When the
+ .IR fn ( arg )
+-function application returns, the child process terminates.  The
+-integer returned by
++function application returns, the child process terminates.
++The integer returned by
+ .I fn
+-is the exit code for the child process.  The child process may also
+-terminate explicitly by calling
++is the exit code for the child process.
++The child process may also terminate explicitly by calling
+ .BR exit (2)
+ or after receiving a fatal signal.
+ 
+ The
+ .I child_stack
+-argument specifies the location of the stack used by the child
+-process.  Since the child and calling process may share memory,
++argument specifies the location of the stack used by the child process.
++Since the child and calling process may share memory,
+ it is not possible for the child process to execute in the
+-same stack as the calling process.  The calling process must therefore
++same stack as the calling process.
++The calling process must therefore
+ set up memory space for the child stack and pass a pointer to this
+ space to
+ .BR clone ().
+@@ -158,11 +133,11 @@
+ If this signal is specified as anything other than
+ .BR SIGCHLD ,
+ then the parent process must specify the
+-.B __WALL 
+-or 
++.B __WALL
++or
+ .B __WCLONE
+-options when waiting for the child with 
+-.BR wait (2).  
++options when waiting for the child with
++.BR wait (2).
+ If no signal is specified, then the parent process is not signaled
+ when the child terminates.
+ 
+@@ -184,20 +159,22 @@
+ .BR fork (2))
+ the child's parent is the calling process.
+ 
+-Note that it is the parent process, as returned by 
++Note that it is the parent process, as returned by
+ .BR getppid (2),
+ which is signaled when the child terminates, so that
+-if 
++if
+ .B CLONE_PARENT
+-is set, then the parent of the calling process, rather than the 
++is set, then the parent of the calling process, rather than the
+ calling process itself, will be signaled.
+ .TP
+ .B CLONE_FS
+ If
+ .B CLONE_FS
+ is set, the caller and the child processes share the same file system
+-information.  This includes the root of the file system, the current
+-working directory, and the umask.  Any call to
++information.
++This includes the root of the file system, the current
++working directory, and the umask.
++Any call to
+ .BR chroot (2),
+ .BR chdir (2),
+ or
+@@ -205,7 +182,7 @@
+ performed by the calling process or the child process also affects the
+ other process.
+ 
+-If 
++If
+ .B CLONE_FS
+ is not set, the child process works on a copy of the file system
+ information of the calling process at the time of the
+@@ -222,7 +199,7 @@
+ .B CLONE_FILES
+ is set, the calling process and the child processes share the same file
+ descriptor table.
+-Any file descriptor created by the calling process or by the child 
++Any file descriptor created by the calling process or by the child
+ process is also valid in the other process.
+ Similarly, if one of the processes closes a file descriptor,
+ or changes its associated flags (using the
+@@ -236,21 +213,23 @@
+ opened in the calling process at the time of
+ .BR clone ().
+ (The duplicated file descriptors in the child refer to the
+-same open file descriptions (see 
++same open file descriptions (see
+ .BR open (2))
+ as the corresponding file descriptors in the calling process.)
+ Subsequent operations that open or close file descriptors,
+ or change file descriptor flags,
+-performed by either the calling 
++performed by either the calling
+ process or the child process do not affect the other process.
+ .TP
+ .BR CLONE_NEWNS " (since Linux 2.4.19)"
+ Start the child in a new namespace.
+ 
+-Every process lives in a namespace. The
++Every process lives in a namespace.
++The
+ .I namespace
+ of a process is the data (the set of mounts) describing the file hierarchy
+-as seen by that process. After a
++as seen by that process.
++After a
+ .BR fork (2)
+ or
+ .BR clone (2)
+@@ -288,12 +267,15 @@
+ If
+ .B CLONE_SIGHAND
+ is set, the calling process and the child processes share the same table of
+-signal handlers.  If the calling process or child process calls
++signal handlers.
++If the calling process or child process calls
+ .BR sigaction (2)
+-to change the behavior associated with a signal, the behavior is 
+-changed in the other process as well.  However, the calling process and child
++to change the behavior associated with a signal, the behavior is
++changed in the other process as well.
++However, the calling process and child
+ processes still have distinct signal masks and sets of pending
+-signals.  So, one of them may block or unblock some signals using
++signals.
++So, one of them may block or unblock some signals using
+ .BR sigprocmask (2)
+ without affecting the other process.
+ 
+@@ -302,7 +284,8 @@
+ is not set, the child process inherits a copy of the signal handlers
+ of the calling process at the time
+ .BR clone ()
+-is called.  Calls to
++is called.
++Calls to
+ .BR sigaction (2)
+ performed later by one of the processes have no effect on the other
+ process.
+@@ -316,14 +299,14 @@
+ is specified
+ .TP
+ .B CLONE_PTRACE
+-If 
++If
+ .B CLONE_PTRACE
+ is specified, and the calling process is being traced,
+ then trace the child also (see
+ .BR ptrace (2)).
+ .TP
+ .BR CLONE_UNTRACED " (since Linux 2.5.46)"
+-If 
++If
+ .B CLONE_UNTRACED
+ is specified, then a tracing process cannot force
+ .B CLONE_PTRACE
+@@ -347,10 +330,10 @@
+ .BR execve (2)
+ or
+ .BR _exit (2)
+-(as with 
++(as with
+ .BR vfork (2)).
+ 
+-If 
++If
+ .B CLONE_VFORK
+ is not set then both the calling process and the child are schedulable
+ after the call, and an application should not rely on execution occurring
+@@ -360,7 +343,8 @@
+ If
+ .B CLONE_VM
+ is set, the calling process and the child processes run in the same memory
+-space.  In particular, memory writes performed by the calling process
++space.
++In particular, memory writes performed by the calling process
+ or by the child process are also visible in the other process.
+ Moreover, any memory mapping or unmapping performed with
+ .BR mmap (2)
+@@ -380,9 +364,11 @@
+ .BR CLONE_PID " (obsolete)"
+ If
+ .B CLONE_PID
+-is set, the child process is created with the same process ID as 
+-the calling process. This is good for hacking the system, but otherwise
+-of not much use. Since 2.3.21 this flag can be
++is set, the child process is created with the same process ID as
++the calling process.
++This is good for hacking the system, but otherwise
++of not much use.
++Since 2.3.21 this flag can be
+ specified only by the system boot process (PID 0).
+ It disappeared in Linux 2.5.16.
+ .TP
+@@ -394,15 +380,12 @@
+ .B CLONE_THREAD
+ more readable, the term "thread" is used to refer to the
+ processes within a thread group.
+-.\" For a while there was CLONE_DETACHED (introduced in 2.5.32):
+-.\" parent wants no child-exit signal. In 2.6.2 the need to give this
+-.\" together with CLONE_THREAD disappeared.
+ 
+ Thread groups were a feature added in Linux 2.4 to support the
+ POSIX threads notion of a set of threads that share a single PID.
+ Internally, this shared PID is the so-called
+ thread group identifier (TGID) for the thread group.
+-Since Linux 2.4, calls to 
++Since Linux 2.4, calls to
+ .BR getpid (2)
+ return the TGID of the caller.
+ 
+@@ -415,7 +398,7 @@
+ its own TID using
+ .BR gettid (2).
+ 
+-When a call is made to 
++When a call is made to
+ .BR clone ()
+ without specifying
+ .BR CLONE_THREAD ,
+@@ -429,13 +412,13 @@
+ .B CLONE_THREAD
+ has the same parent process as the caller of
+ .BR clone ()
+-(i.e., like 
++(i.e., like
+ .BR CLONE_PARENT ),
+ so that calls to
+ .BR getppid (2)
+ return the same value for all of the threads in a thread group.
+ When a
+-.B CLONE_THREAD 
++.B CLONE_THREAD
+ thread terminates, the thread that created it using
+ .BR clone ()
+ is not sent a
+@@ -494,16 +477,16 @@
+ returns a signal set that is the union of the signals pending for the
+ whole process and the signals that are pending for the calling thread.
+ 
+-If 
++If
+ .BR kill (2)
+ is used to send a signal to a thread group,
+ and the thread group has installed a handler for the signal, then
+ the handler will be invoked in exactly one, arbitrarily selected
+ member of the thread group that has not blocked the signal.
+-If multiple threads in a group are waiting to accept the same signal using 
++If multiple threads in a group are waiting to accept the same signal using
+ .BR sigwaitinfo (2),
+ the kernel will arbitrarily select one of these threads
+-to receive a signal sent using 
++to receive a signal sent using
+ .BR kill (2).
+ .TP
+ .BR CLONE_SYSVSEM " (since Linux 2.5.10)"
+@@ -540,32 +523,34 @@
+ at that address.
+ The address involved may be changed by the
+ .BR set_tid_address (2)
+-system call. This is used by threading libraries.
+-
++system call.
++This is used by threading libraries.
+ .SS "sys_clone"
+ The
+ .B sys_clone
+ system call corresponds more closely to
+ .BR fork (2)
+ in that execution in the child continues from the point of the
+-call.  Thus,
++call.
++Thus,
+ .B sys_clone
+ only requires the
+ .I flags
+-and 
++and
+ .I child_stack
+-arguments, which have the same meaning as for 
+-.BR clone ().  
++arguments, which have the same meaning as for
++.BR clone ().
+ (Note that the order of these arguments differs from
+-.BR clone ().)  
++.BR clone ().)
+ 
+-Another difference for 
++Another difference for
+ .B sys_clone
+ is that the
+ .I child_stack
+-argument may be zero, in which case copy-on-write semantics ensure that the 
++argument may be zero, in which case copy-on-write semantics ensure that the
+ child gets separate copies of stack pages when either process modifies
+-the stack.  In this case, for correct operation, the 
++the stack.
++In this case, for correct operation, the
+ .B CLONE_VM
+ option should not be specified.
+ 
+@@ -579,16 +564,14 @@
+ which points to the location (in child memory) where the child thread ID
+ will be written in case CLONE_CHILD_SETTID was specified.
+ .SH "RETURN VALUE"
+-.\" gettid() returns current->pid;
+-.\" getpid() returns current->tgid;
++.\" gettid(2) returns current->pid;
++.\" getpid(2) returns current->tgid;
+ On success, the thread ID of the child process is returned
+-in the caller's thread of execution.  On failure, a \-1 will be returned
++in the caller's thread of execution.
++On failure, a \-1 will be returned
+ in the caller's context, no child process will be created, and
+ .I errno
+ will be set appropriately.
+-
+-
+-
+ .SH ERRORS
+ .TP
+ .B EAGAIN
+@@ -598,7 +581,8 @@
+ .B CLONE_SIGHAND
+ was specified, but
+ .B CLONE_VM
+-was not. (Since Linux 2.6.0-test6.)
++was not.
++(Since Linux 2.6.0-test6.)
+ .TP
+ .B EINVAL
+ .B CLONE_THREAD
+@@ -622,9 +606,9 @@
+ .IR flags .
+ .TP
+ .B EINVAL
+-Returned by 
++Returned by
+ .BR clone ()
+-when a zero value is specified for 
++when a zero value is specified for
+ .IR child_stack .
+ .TP
+ .B ENOMEM
+@@ -639,12 +623,20 @@
+ .B EPERM
+ .B CLONE_PID
+ was specified by a process other than process 0.
+-.SH AVAILABILITY
++.SH VERSIONS
+ There is no entry for
+ .BR clone ()
+-in libc5.  glibc2 provides
++in libc5.
++glibc2 provides
+ .BR clone ()
+ as described in this manual page.
++.SH "CONFORMING TO"
++The
++.BR clone ()
++and
++.B sys_clone
++calls are Linux specific and should not be used in programs
++intended to be portable.
+ .SH NOTES
+ In the kernel 2.4.x series,
+ .B CLONE_THREAD
+@@ -653,27 +645,51 @@
+ However, for kernel versions 2.4.7 to 2.4.18 the
+ .B CLONE_THREAD
+ flag implied the
+-.B CLONE_PARENT 
++.B CLONE_PARENT
+ flag (as in kernel 2.6).
+ 
++For a while there was
++.B CLONE_DETACHED
++(introduced in 2.5.32):
++parent wants no child-exit signal.
++In 2.6.2 the need to give this
++together with
++.B CLONE_THREAD
++disappeared.
++This flag is still defined, but has no effect.
++
+ On x86,
+ .BR clone ()
+ should not be called through vsyscall, but directly through
+ .IR "int $0x80" .
+-.SH "CONFORMING TO"
++
++On IA-64, a different system call is used:
++.nf
++
++.BI "int __clone2(int (*" fn ")(void *),  void *" child_stack_base ,
++.BI "             size_t " stack_size ", int " flags ", void *" arg ", ..."
++.BI "             /* pid_t *" pid ", struct user_desc *" tls \
++", pid_t *" ctid " */ );"
++.fi
++.PP
+ The
+-.BR clone ()
++.BR __clone2 ()
++system call operates in the same way as
++.BR clone (),
++except that
++.I child_stack_base
++points to the lowest address of the child's stack area,
+ and
+-.B sys_clone
+-calls are Linux-specific and should not be used in programs
+-intended to be portable.
++.I stack_size
++specifies the size of the stack pointed to by
++.IR child_stack_base .
+ .SH BUGS
+ Versions of the GNU C library that include the NPTL threading library
+-contain a wrapper function for 
+-.BR getpid ()
++contain a wrapper function for
++.BR getpid (2)
+ that performs caching of PIDs.
+-In programs linked against such libraries, calls to 
+-.BR getpid ()
++In programs linked against such libraries, calls to
++.BR getpid (2)
+ may return the same value, even when the threads were not created using
+ .B CLONE_THREAD
+ (and thus are not in the same thread group).
+diff -ur man-pages-2.39/man2/getdents.2 man-pages-2.55/man2/getdents.2
+--- man-pages-2.39/man2/getdents.2	2006-08-03 15:57:17.000000000 +0200
++++ man-pages-2.55/man2/getdents.2	2007-05-26 17:22:28.000000000 +0200
+@@ -8,7 +8,7 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+@@ -16,7 +16,7 @@
+ .\" have taken the same level of care in the production of this manual,
+ .\" which is licensed free of charge, as they might when working
+ .\" professionally.
+-.\" 
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+@@ -24,7 +24,7 @@
+ .\" Modified 22 July 1995 by Michael Chastain <mec@duracef.shout.net>:
+ .\"   Derived from 'readdir.2'.
+ .\" Modified Tue Oct 22 08:11:14 EDT 1996 by Eric S. Raymond <esr@thyrsus.com>
+-.TH GETDENTS 2  1995-07-22 "Linux 1.3.6" "Linux Programmer's Manual"
++.TH GETDENTS 2  2007-06-01 "Linux 1.3.6" "Linux Programmer's Manual"
+ .SH NAME
+ getdents \- get directory entries
+ .SH SYNOPSIS
+@@ -35,9 +35,6 @@
+ .B #include <linux/unistd.h>
+ .B #include <errno.h>
+ .sp
+-.B _syscall3(int, getdents, uint, fd, struct dirent *, dirp, uint, count)
+-        /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+-.sp
+ .BI "int getdents(unsigned int " fd ", struct dirent *" dirp ", unsigned int " count );
+ .fi
+ .SH DESCRIPTION
+@@ -49,14 +46,14 @@
+ .PP
+ The system call
+ .BR getdents ()
+-reads several 
++reads several
+ .I dirent
+ structures from the directory
+ pointed at by
+ .I fd
+ into the memory area pointed to by
+ .IR dirp .
+-The parameter 
++The parameter
+ .I count
+ is the size of the memory area.
+ .PP
+@@ -66,8 +63,7 @@
+ .PP
+ .RS
+ .nf
+-struct dirent
+-{
++struct dirent {
+     long d_ino;                 /* inode number */
+     off_t d_off;                /* offset to next \fIdirent\fP */
+     unsigned short d_reclen;    /* length of this \fIdirent\fP */
+@@ -115,6 +111,9 @@
+ .SH "CONFORMING TO"
+ SVr4.
+ .\" SVr4 documents additional ENOLINK, EIO error conditions.
++.SH NOTES
++Glibc does not provide a wrapper for this system call; call it using
++.BR syscall (2).
+ .SH "SEE ALSO"
+ .BR readdir (2),
+ .BR readdir (3)
+diff -ur man-pages-2.39/man2/gettid.2 man-pages-2.55/man2/gettid.2
+--- man-pages-2.39/man2/gettid.2	2006-03-16 01:50:08.000000000 +0100
++++ man-pages-2.55/man2/gettid.2	2007-05-26 17:22:28.000000000 +0200
+@@ -9,7 +9,7 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+@@ -17,42 +17,42 @@
+ .\" have taken the same level of care in the production of this manual,
+ .\" which is licensed free of charge, as they might when working
+ .\" professionally.
+-.\" 
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+-.TH GETTID 2 "2003-02-01" "Linux 2.4.20" "Linux Programmer's Manual"
++.TH GETTID 2 2007-06-01 "Linux 2.4.20" "Linux Programmer's Manual"
+ .SH NAME
+ gettid \- get thread identification
+ .SH SYNOPSIS
+ .nf
+ .B #include <sys/types.h>
+-.br
+-.B #include <linux/unistd.h>
+-.br
+-.B #include <errno.h>
+-.sp
+-.B _syscall0(pid_t, gettid)
+-        /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+ .sp
+-.fi
+ .B pid_t gettid(void);
++.fi
+ .SH DESCRIPTION
+-\fBgettid\fP() returns the thread ID of the current process. This is equal
++.BR gettid ()
++returns the thread ID of the current process.
++This is equal
+ to the process ID (as returned by
+ .BR getpid (2)),
+ unless the process is part of a thread group (created by specifying
+ the CLONE_THREAD flag to the
+ .BR clone (2)
+-system call). All processes in the same thread group
++system call).
++All processes in the same thread group
+ have the same PID, but each one has a unique TID.
+ .SH "RETURN VALUE"
+ On success, returns the thread ID of the current process.
+ .SH ERRORS
+ This call is always successful.
+ .SH "CONFORMING TO"
+-\fBgettid\fP() is Linux specific and should not be used in programs that
++.BR gettid ()
++is Linux specific and should not be used in programs that
+ are intended to be portable.
++.SH NOTES
++Glibc does not provide a wrapper for this system call; call it using
++.BR syscall (2).
+ .SH "SEE ALSO"
+ .BR clone (2),
+ .BR fork (2),
+diff -ur man-pages-2.39/man2/ioprio_set.2 man-pages-2.55/man2/ioprio_set.2
+--- man-pages-2.39/man2/ioprio_set.2	2006-08-04 11:41:28.000000000 +0200
++++ man-pages-2.55/man2/ioprio_set.2	2007-05-27 17:23:47.000000000 +0200
+@@ -22,19 +22,11 @@
+ .\" with various additions by Michael Kerrisk <mtk-manpages@gmx.net>
+ .\"
+ .\"
+-.TH IOPRIO_GET 2 2006-04-27 "2.6.13" "Linux Programmer's Manual"
++.TH IOPRIO_GET 2 2007-06-01 "Linux" "Linux Programmer's Manual"
+ .SH NAME
+ ioprio_get, ioprio_set \- get/set I/O scheduling class and priority
+ .SH SYNOPSIS
+ .nf
+-.B #include <errno.h>
+-.B #include <linux/unistd.h>
+-.sp
+-.B _syscall2(int, ioprio_get, int, which, int, who);
+-.B _syscall3(int, ioprio_set, int, which, int, who, int, ioprio);
+-.RB "        /* Using " syscall "(2) might be preferable; see " intro \
+-"(2) */"
+-.sp
+ .BI "int ioprio_get(int " which ", int " who );
+ .BI "int ioprio_set(int " which ", int " who ", int " ioprio );
+ .fi
+@@ -72,7 +64,7 @@
+ have a matching real UID.
+ .PP
+ If
+-.I who
++.I which
+ is specified as
+ .B IOPRIO_WHO_PGRP
+ or
+@@ -138,10 +130,10 @@
+ information on scheduling classes and priorities.
+ 
+ I/O priorities are supported for reads and for synchronous (O_DIRECT,
+-O_SYNC) writes. I/O priorities are not supported for asynchronous
++O_SYNC) writes.
++I/O priorities are not supported for asynchronous
+ writes because they are issued outside the context of the program
+ dirtying the memory, and thus program-specific priorities do not apply.
+-
+ .SH "RETURN VALUE"
+ On success,
+ .BR ioprio_get ()
+@@ -186,7 +178,15 @@
+ Refer to the NOTES section for available scheduler
+ classes and priority levels for
+ .IR ioprio .
++.SH VERSIONS
++These system calls have been available on Linux since
++kernel 2.6.13.
++.SH "CONFORMING TO"
++These system calls are Linux specific.
+ .SH NOTES
++Glibc does not provide wrapper for these system calls; call them using
++.BR syscall (2).
++
+ These system calls only have an effect when used
+ in conjunction with an I/O scheduler that supports I/O priorities.
+ As at kernel 2.6.17 the only such scheduler is the Completely Fair Queuing
+@@ -215,7 +215,7 @@
+ in the example).
+ Setting another scheduler is done by writing the name of the
+ new scheduler to this file.
+-For example, the following command will set the set the
++For example, the following command will set the
+ scheduler for the
+ .I hda
+ device to
+@@ -236,7 +236,8 @@
+ each one containing one or more priority levels:
+ .TP
+ .BR IOPRIO_CLASS_RT " (1)"
+-This is the real-time I/O class. This scheduling class is given
++This is the real-time I/O class.
++This scheduling class is given
+ higher priority than any other class:
+ processes from this class are
+ given first access to the disk every time.
+@@ -265,8 +266,10 @@
+ .BR IOPRIO_CLASS_IDLE " (3)"
+ This is the idle scheduling class.
+ Processes running at this level only get I/O
+-time when no one else needs the disk. The idle class has no class
+-data. Attention is required when assigning this priority class process,
++time when no one else needs the disk.
++The idle class has no class
++data.
++Attention is required when assigning this priority class to a process,
+ since it may become starved if higher priority processes are
+ constantly accessing the disk.
+ .PP
+@@ -299,17 +302,14 @@
+ must follow both rules, or the call will fail with the error
+ .BR EPERM .
+ .SH BUGS
+-.\" FIXME . One day we must revisit this to see if glibc has
+-.\" the right stuff.
++.\" 6 May 07: Bug report raised:
++.\" http://sources.redhat.com/bugzilla/show_bug.cgi?id=4464
++.\" Ulriich Drepper replied that he wasn't going to add these
++.\" to glibc.
+ Glibc does not yet provide a suitable header file defining
+ the function prototypes and macros described on this page.
+ Suitable definitions can be found in
+ .IR linux/ioprio.h .
+-.SH VERSIONS
+-These system calls have been available on Linux since
+-kernel 2.6.13.
+-.SH "CONFORMING TO"
+-These system calls are Linux specific.
+ .SH "SEE ALSO"
+ .BR getpriority "(2), " open "(2), " capabilities (7)
+ .sp
+diff -ur man-pages-2.39/man2/llseek.2 man-pages-2.55/man2/llseek.2
+--- man-pages-2.39/man2/llseek.2	2006-03-16 01:50:08.000000000 +0100
++++ man-pages-2.55/man2/llseek.2	2007-05-26 17:22:28.000000000 +0200
+@@ -8,7 +8,7 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+@@ -16,32 +16,23 @@
+ .\" have taken the same level of care in the production of this manual,
+ .\" which is licensed free of charge, as they might when working
+ .\" professionally.
+-.\" 
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+ .\" Written 10 June 1995 by Andries Brouwer <aeb@cwi.nl>
+ .\" Modified Thu Oct 31 15:16:23 1996 by Eric S. Raymond <esr@thyrsus.com>
+ .\"
+-.TH LLSEEK 2 1995-06-10 "Linux 1.2.9" "Linux Programmer's Manual"
++.TH LLSEEK 2 2007-06-01 "Linux 1.2.9" "Linux Programmer's Manual"
+ .SH NAME
+ _llseek \- reposition read/write file offset
+ .SH SYNOPSIS
+ .nf
+-.B #include <unistd.h>
+-.sp
+ .B #include <sys/types.h>
+-.sp
+-.B #include <linux/unistd.h>
+-.sp
+-.B #include <errno.h>
+-.sp
+-.B _syscall5(int, _llseek, unsigned int, fd, unsigned long, hi, 
+-.B "         " unsigned long, lo, loff_t *, res, unsigned int, wh)
+-         /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
++.B #include <unistd.h>
+ .sp
+ .BI "int _llseek(unsigned int " fd ", unsigned long " offset_high ,
+-.BI "            unsigned long " offset_low ", loff_t *" result , 
++.BI "            unsigned long " offset_low ", loff_t *" result ,
+ .BI "            unsigned int " whence );
+ .fi
+ .SH DESCRIPTION
+@@ -63,7 +54,6 @@
+ respectively.
+ It returns the resulting file position in the argument
+ .IR result .
+-
+ .SH "RETURN VALUE"
+ Upon successful completion,
+ .BR _llseek ()
+@@ -83,8 +73,11 @@
+ .I whence
+ is invalid.
+ .SH "CONFORMING TO"
+-This function is Linux-specific, and should not be used in programs
++This function is Linux specific, and should not be used in programs
+ intended to be portable.
++.SH NOTES
++Glibc does not provide a wrapper for this system call; call it using
++.BR syscall (2).
+ .SH "SEE ALSO"
+ .BR lseek (2),
+-.BR lseek64 (3)    
++.BR lseek64 (3)
+diff -ur man-pages-2.39/man2/mmap2.2 man-pages-2.55/man2/mmap2.2
+--- man-pages-2.39/man2/mmap2.2	2007-06-18 17:16:18.000000000 +0200
++++ man-pages-2.55/man2/mmap2.2	2007-06-20 18:37:11.000000000 +0200
+@@ -10,7 +10,7 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+@@ -18,7 +18,7 @@
+ .\" have taken the same level of care in the production of this manual,
+ .\" which is licensed free of charge, as they might when working
+ .\" professionally.
+-.\" 
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+@@ -26,26 +26,18 @@
+ .\"	Added description of mmap2
+ .\" Modified, 2004-11-25, mtk -- removed stray #endif in prototype
+ .\"
+-.TH MMAP2 2 2002-01-31 "Linux 2.3.31" "Linux Programmer's Manual"
++.TH MMAP2 2 2007-06-01 "Linux 2.3.31" "Linux Programmer's Manual"
+ .SH NAME
+ mmap2 \- map files or devices into memory
+ .SH SYNOPSIS
+ .nf
+ .B #include <sys/mman.h>
+-.br
+-.B #include <syscall.h>
+-.br
+-.B #include <errno.h>
+ .sp
+-.BI "_syscall6(void *, " mmap2 ", void *, " start ", size_t, " length ,
+-.BI "          int, " prot ", int, " flags ", int, " fd ", off_t, " pgoffset )
+-          /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+-.sp
+-.BI "void * mmap2(void *" start ", size_t " length ", int " prot ,
++.BI "void *mmap2(void *" start ", size_t " length ", int " prot ,
+ .BI "             int " flags ", int " fd ", off_t " pgoffset );
+ .fi
+ .SH DESCRIPTION
+-The 
++The
+ .BR mmap2 ()
+ system call operates in exactly the same way as
+ .BR mmap (2),
+@@ -56,18 +48,24 @@
+ to map
+ larger files (typically up to 2^44 bytes).
+ .SH "RETURN VALUE"
+-On success, 
++On success,
+ .BR mmap2 ()
+-returns a pointer to the mapped area. On error \-1 is returned 
++returns a pointer to the mapped area.
++On error \-1 is returned
+ and
+ .I errno
+ is set appropriately.
+ .SH ERRORS
+ .TP
+-.SH EFAULT
++.B EFAULT
+ Problem with getting the
+ data from userspace.
++.SH "CONFORMING TO"
++This system call is Linux specific.
+ .SH NOTES
++Glibc does not provide a wrapper for this system call; call it using
++.BR syscall (2).
++
+ .BR mmap2 ()
+ is available since Linux 2.3.31.
+ It is Linux specific, and should be avoided in portable applications.
+@@ -76,8 +74,6 @@
+ is used to implement the
+ .BR mmap64 ()
+ function that is part of the LFS (Large File Summit).
+-.SH "CONFORMING TO"
+-This system call is Linux specific.
+ .SH "SEE ALSO"
+ .BR getpagesize (2),
+ .BR mmap (2),
+diff -ur man-pages-2.39/man2/modify_ldt.2 man-pages-2.55/man2/modify_ldt.2
+--- man-pages-2.39/man2/modify_ldt.2	2006-03-16 01:50:08.000000000 +0100
++++ man-pages-2.55/man2/modify_ldt.2	2007-05-26 17:22:28.000000000 +0200
+@@ -22,20 +22,12 @@
+ .\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+ .\" USA.
+ .\"
+-.TH MODIFY_LDT 2 1995-07-22 "Linux 1.3.6" "Linux Programmer's Manual"
++.TH MODIFY_LDT 2 2007-06-01 "Linux 1.3.6" "Linux Programmer's Manual"
+ .SH NAME
+ modify_ldt \- get or set ldt
+ .SH SYNOPSIS
+ .nf
+ .B #include <sys/types.h>
+-.br
+-.B #include <linux/unistd.h>
+-.br
+-.B #include <errno.h>
+-.sp
+-.BI "_syscall3(int, modify_ldt, int, " func ", void *, " ptr , 
+-.BI "          unsigned long, " bytecount )
+-          /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+ .sp
+ .BI "int modify_ldt(int " "func" ", void *" "ptr" ", unsigned long " "bytecount" );
+ .fi
+@@ -104,7 +96,10 @@
+ .I func
+ is neither 0 nor 1.
+ .SH "CONFORMING TO"
+-This call is Linux-specific and should not be used in programs intended
++This call is Linux specific and should not be used in programs intended
+ to be portable.
++.SH NOTES
++Glibc does not provide a wrapper for this system call; call it using
++.BR syscall (2).
+ .SH "SEE ALSO"
+ .BR vm86 (2)
+diff -ur man-pages-2.39/man2/mq_getsetattr.2 man-pages-2.55/man2/mq_getsetattr.2
+--- man-pages-2.39/man2/mq_getsetattr.2	2006-05-12 21:05:35.000000000 +0200
++++ man-pages-2.55/man2/mq_getsetattr.2	2007-05-26 17:22:28.000000000 +0200
+@@ -11,29 +11,23 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+-.\" the use of the information contained herein.  
+-.\" 
++.\" the use of the information contained herein.
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+-.TH MQ_GETSETATTR 2 2006-05-14 "Linux 2.6.16" "Linux Programmer's Manual"
++.TH MQ_GETSETATTR 2 2007-06-01 "Linux 2.6.16" "Linux Programmer's Manual"
+ .SH NAME
+ mq_getsetattr \- get/set message queue attributes
+ .SH SYNOPSIS
+ .nf
+ .B #include <sys/types.h>
+-.br
+-.B #include <linux/unistd.h>
+-.br
+-.B #include <errno.h>
++.B #include <mqueue.h>
+ .sp
+-.B "_syscall3(mqd_t, mqdes, struct mq_attr *, newattr,
+-.B "                 struct mq_attr *, oldattr);
+-        /* Or use \fBsyscall\fP(2); see \fBintro\fP(2) */
+ .BI "mqd_t mq_getsetattr(mqd_t " mqdes ", struct mq_attr *" newattr ","
+ .BI "                 struct mq_attr *" oldattr );
+ .fi
+@@ -44,11 +38,15 @@
+ .BR mq_getattr (3)
+ and
+ .BR mq_setattr (3).
+-For an explanation of how this system call operates, 
++For an explanation of how this system call operates,
+ see the description of
+ .BR mq_setattr (3).
+ .SH CONFORMING TO
+ This interface is non-standard; avoid its use.
++.SH NOTES
++Glibc does not provide a wrapper for this system call; call it using
++.BR syscall (2).
++(Actually, never call it unless you are writing a libc!)
+ .SH "SEE ALSO"
+ .BR mq_getattr (3),
+ .BR mq_overview (7)
+diff -ur man-pages-2.39/man2/pivot_root.2 man-pages-2.55/man2/pivot_root.2
+--- man-pages-2.39/man2/pivot_root.2	2006-03-16 01:50:08.000000000 +0100
++++ man-pages-2.55/man2/pivot_root.2	2007-05-26 17:22:28.000000000 +0200
+@@ -4,20 +4,14 @@
+ .\" Written 2000-02-23 by Werner Almesberger
+ .\" Modified 2004-06-17 Michael Kerrisk <mtk-manpages@gmx.net>
+ .\"
+-.TH PIVOT_ROOT 2 2004-06-17 "Linux 2.6.7" "Linux Programmer's Manual"
++.TH PIVOT_ROOT 2 2007-06-01 "Linux 2.6.7" "Linux Programmer's Manual"
+ .SH NAME
+ pivot_root \- change the root file system
+ .SH SYNOPSIS
+-.B #include <linux/unistd.h>
+-.br
+-.B #include <errno.h>
+-.sp
+-.B _syscall2(int,pivot_root,const char *,new_root,const char *,put_old)
+-          /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+-.sp
+ .BI "int pivot_root(const char *" new_root ", const char *" put_old );
+ .SH DESCRIPTION
+-\fBpivot_root\fP() moves the root file system of the current process to the
++.BR pivot_root ()
++moves the root file system of the current process to the
+ directory \fIput_old\fP and makes \fInew_root\fP the new root file system
+ of the current process.
+ .\"
+@@ -25,32 +19,49 @@
+ .\" .B CAP_SYS_ADMIN
+ .\" capability is required.
+ 
+-The typical use of \fBpivot_root\fP() is during system startup, when the
++The typical use of
++.BR pivot_root ()
++is during system startup, when the
+ system mounts a temporary root file system (e.g. an \fBinitrd\fP), then
+ mounts the real root file system, and eventually turns the latter into
+ the current root of all relevant processes or threads.
+ 
+-\fBpivot_root\fP() may or may not change the current root and the current
++.BR pivot_root ()
++may or may not change the current root and the current
+ working directory (cwd) of any processes or threads which use the old
+-root directory. The caller of \fBpivot_root\fP()
++root directory.
++The caller of
++.BR pivot_root ()
+ must ensure that processes with root or cwd at the old root operate
+-correctly in either case. An easy way to ensure this is to change their 
+-root and cwd to \fInew_root\fP before invoking \fBpivot_root\fP().
++correctly in either case.
++An easy way to ensure this is to change their
++root and cwd to \fInew_root\fP before invoking
++.BR pivot_root ().
+ 
+ The paragraph above is intentionally vague because the implementation
+-of \fBpivot_root\fP() may change in the future. At the time of writing,
+-\fBpivot_root\fP() changes root and cwd of each process or
+-thread to \fInew_root\fP if they point to the old root directory. This
++of
++.BR pivot_root ()
++may change in the future.
++At the time of writing,
++.BR pivot_root ()
++changes root and cwd of each process or
++thread to \fInew_root\fP if they point to the old root directory.
++This
+ is necessary in order to prevent kernel threads from keeping the old
+ root directory busy with their root and cwd, even if they never access
+-the file system in any way. In the future, there may be a mechanism for
++the file system in any way.
++In the future, there may be a mechanism for
+ kernel threads to explicitly relinquish any access to the file system,
+ such that this fairly intrusive mechanism can be removed from
+-\fBpivot_root\fP().
++.BR pivot_root ().
+ 
+-Note that this also applies to the current process: \fBpivot_root\fP() may
+-or may not affect its cwd. It is therefore recommended to call
+-\fBchdir("/")\fP immediately after \fBpivot_root\fP().
++Note that this also applies to the current process:
++.BR pivot_root ()
++may
++or may not affect its cwd.
++It is therefore recommended to call
++\fBchdir("/")\fP immediately after
++.BR pivot_root ().
+ 
+ The following restrictions apply to \fInew_root\fP and \fIput_old\fP:
+ .IP \- 3
+@@ -65,22 +76,30 @@
+ .IP \- 3
+ No other file system may be mounted on \fIput_old\fP.
+ .PP
+-See also \fBpivot_root(8)\fP for additional usage examples.
++See also 
++.BR pivot_root (8)
++for additional usage examples.
+ 
+-If the current root is not a mount point (e.g. after \fBchroot(2)\fP or
+-\fBpivot_root\fP(), see also below), not the old root directory, but the
++If the current root is not a mount point (e.g. after
++.BR chroot (2)
++or
++.BR pivot_root (),
++see also below), not the old root directory, but the
+ mount point of that file system is mounted on \fIput_old\fP.
+-.SH NOTES
+-\fInew_root\fP does not have to be a mount point. In this case,
++
++\fInew_root\fP does not have to be a mount point.
++In this case,
+ \fI/proc/mounts\fP will show the mount point of the file system containing
+ \fInew_root\fP as root (\fI/\fP).
+ .SH "RETURN VALUE"
+-On success, zero is returned.  On error, \-1 is returned, and
++On success, zero is returned.
++On error, \-1 is returned, and
+ \fIerrno\fP is set appropriately.
+ .SH ERRORS
+-\fBpivot_root\fP() may return (in \fIerrno\fP) any of the errors returned by
+-\fBstat(2)\fP. Additionally, it may return:
+-
++.BR pivot_root ()
++may return (in \fIerrno\fP) any of the errors returned by
++.BR stat (2).
++Additionally, it may return:
+ .TP
+ .B EBUSY
+ \fInew_root\fP or \fIput_old\fP are on the current root file system,
+@@ -96,16 +115,24 @@
+ The current process does not have the
+ .B CAP_SYS_ADMIN
+ capability.
++.SH VERSIONS
++.BR pivot_root ()
++was introduced in Linux 2.3.41.
++.SH "CONFORMING TO"
++.BR pivot_root ()
++is Linux specific and hence is not portable.
+ .SH BUGS
+-\fBpivot_root\fP() should not have to change root and cwd of all other
++.BR pivot_root ()
++should not have to change root and cwd of all other
+ processes in the system.
+ 
+-Some of the more obscure uses of \fBpivot_root\fP() may quickly lead to
++Some of the more obscure uses of
++.BR pivot_root ()
++may quickly lead to
+ insanity.
+-.SH "CONFORMING TO"
+-\fBpivot_root\fP() is Linux-specific and hence is not portable.
+-.SH HISTORY
+-\fBpivot_root\fP() was introduced in Linux 2.3.41.
++.SH NOTES
++Glibc does not provide a wrapper for this system call; call it using
++.BR syscall (2).
+ .SH "SEE ALSO"
+ .BR chdir (2),
+ .BR chroot (2),
+diff -ur man-pages-2.39/man2/readdir.2 man-pages-2.55/man2/readdir.2
+--- man-pages-2.39/man2/readdir.2	2006-06-08 20:21:00.000000000 +0200
++++ man-pages-2.55/man2/readdir.2	2007-05-26 17:22:28.000000000 +0200
+@@ -8,7 +8,7 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+@@ -16,7 +16,7 @@
+ .\" have taken the same level of care in the production of this manual,
+ .\" which is licensed free of charge, as they might when working
+ .\" professionally.
+-.\" 
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+@@ -25,19 +25,13 @@
+ .\"   In 1.3.X, returns only one entry each time; return value is different.
+ .\" Modified 2004-12-01, mtk, fixed headers listed in SYNOPSIS
+ .\"
+-.TH READDIR 2  1995-07-22 "Linux 1.3.6" "Linux Programmer's Manual"
++.TH READDIR 2  2007-06-01 "Linux 1.3.6" "Linux Programmer's Manual"
+ .SH NAME
+ readdir \- read directory entry
+ .SH SYNOPSIS
+ .nf
+ .B #include <linux/types.h>
+ .B #include <linux/dirent.h>
+-.B #include <linux/unistd.h>
+-.B #include <errno.h>
+-.sp
+-.B _syscall3(int, readdir, unsigned int, fd, struct dirent *, dirp,
+-.B "          unsigned int, count)"
+-          /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+ .sp
+ .BI "int readdir(unsigned int " fd ", struct dirent *" dirp ","
+ .BI "            unsigned int " count );
+@@ -59,7 +53,7 @@
+ .I fd
+ into the memory area pointed to by
+ .IR dirp .
+-The parameter 
++The parameter
+ .I count
+ is ignored; at most one dirent structure is read.
+ .PP
+@@ -90,7 +84,6 @@
+ not counting the null terminator.
+ .I d_name
+ is a null-terminated filename.
+-.PP
+ .SH "RETURN VALUE"
+ On success, 1 is returned.
+ On end of directory, 0 is returned.
+@@ -116,6 +109,9 @@
+ File descriptor does not refer to a directory.
+ .SH "CONFORMING TO"
+ This system call is Linux specific.
++.SH NOTES
++Glibc does not provide a wrapper for this system call; call it using
++.BR syscall (2).
+ .SH "SEE ALSO"
+ .BR getdents (2),
+ .BR readdir (3)
+diff -ur man-pages-2.39/man2/setup.2 man-pages-2.55/man2/setup.2
+--- man-pages-2.39/man2/setup.2	2005-10-19 08:54:38.000000000 +0200
++++ man-pages-2.55/man2/setup.2	2007-04-13 00:42:49.000000000 +0200
+@@ -10,7 +10,7 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+@@ -18,7 +18,7 @@
+ .\" have taken the same level of care in the production of this manual,
+ .\" which is licensed free of charge, as they might when working
+ .\" professionally.
+-.\" 
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+diff -ur man-pages-2.39/man2/sysctl.2 man-pages-2.55/man2/sysctl.2
+--- man-pages-2.39/man2/sysctl.2	2006-03-16 01:50:08.000000000 +0100
++++ man-pages-2.55/man2/sysctl.2	2007-05-28 17:52:03.000000000 +0200
+@@ -8,7 +8,7 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+@@ -16,7 +16,7 @@
+ .\" have taken the same level of care in the production of this manual,
+ .\" which is licensed free of charge, as they might when working
+ .\" professionally.
+-.\" 
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+@@ -25,83 +25,49 @@
+ .\" Modified Tue Oct 22 22:28:41 1996 by Eric S. Raymond <esr@thyrsus.com>
+ .\" Modified Mon Jan  5 20:31:04 1998 by aeb.
+ .\"
+-.TH SYSCTL 2 1996-04-11 "Linux 1.3.85" "Linux Programmer's Manual"
++.TH SYSCTL 2 2007-06-01 "Linux 1.3.85" "Linux Programmer's Manual"
+ .SH NAME
+ sysctl \- read/write system parameters
+ .SH SYNOPSIS
+ .nf
+ .B #include <unistd.h>
+ .br
+-.B #include <linux/unistd.h>
+-.br
+ .B #include <linux/sysctl.h>
+-.br
+-.B #include <errno.h>
+-.sp
+-.B _syscall1(int, _sysctl, struct __sysctl_args *, args)
+-          /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+ .sp
+ .BI "int _sysctl(struct __sysctl_args *" args );
+ .fi
+ .SH DESCRIPTION
+ The
+ .BR _sysctl ()
+-call reads and/or writes kernel parameters. For example, the hostname,
+-or the maximum number of open files. The argument has the form
++call reads and/or writes kernel parameters.
++For example, the hostname,
++or the maximum number of open files.
++The argument has the form
+ .PP
++.in +0.25i
+ .nf
+ struct __sysctl_args {
+-        int *name;        /* integer vector describing variable */
+-        int nlen;         /* length of this vector */
+-        void *oldval;     /* 0 or address where to store old value */
+-        size_t *oldlenp;  /* available room for old value,
+-                             overwritten by actual size of old value */
+-        void *newval;     /* 0 or address of new value */
+-        size_t newlen;    /* size of new value */
++    int    *name;    /* integer vector describing variable */
++    int     nlen;    /* length of this vector */
++    void   *oldval;  /* 0 or address where to store old value */
++    size_t *oldlenp; /* available room for old value,
++                        overwritten by actual size of old value */
++    void   *newval;  /* 0 or address of new value */
++    size_t  newlen;  /* size of new value */
+ };
+ .fi
++.in
+ .PP
+ This call does a search in a tree structure, possibly resembling
+ a directory tree under
+ .IR /proc/sys ,
+ and if the requested item is found calls some appropriate routine
+ to read or modify the value.
+-
+-.SH EXAMPLE
+-.nf
+-#include <linux/unistd.h>
+-#include <linux/types.h>
+-#include <linux/sysctl.h>
+-
+-_syscall1(int, _sysctl, struct __sysctl_args *, args);
+-int sysctl(int *name, int nlen, void *oldval, size_t *oldlenp,
+-           void *newval, size_t newlen)
+-{
+-        struct __sysctl_args args={name,nlen,oldval,oldlenp,newval,newlen};
+-        return _sysctl(&args);
+-}
+-
+-#define SIZE(x) sizeof(x)/sizeof(x[0])
+-#define OSNAMESZ 100
+-
+-char osname[OSNAMESZ];
+-int osnamelth;
+-int name[] = { CTL_KERN, KERN_OSTYPE };
+-
+-main(){
+-        osnamelth = sizeof(osname);
+-        if (sysctl(name, SIZE(name), osname, &osnamelth, 0, 0))
+-                perror("sysctl");
+-        else
+-                printf("This machine is running %*s\en", osnamelth, osname);
+-        return 0;
+-}
+-.fi
+-
+ .SH "RETURN VALUE"
+ Upon successful completion,
+ .BR _sysctl ()
+-returns 0. Otherwise, a value of \-1 is returned and
++returns 0.
++Otherwise, a value of \-1 is returned and
+ .I errno
+ is set to indicate the error.
+ .SH ERRORS
+@@ -124,12 +90,14 @@
+ .I newval
+ was non-zero.
+ .SH "CONFORMING TO"
+-This call is Linux-specific, and should not be used in programs
++This call is Linux specific, and should not be used in programs
+ intended to be portable.
+ A
+ .BR sysctl ()
+-call has been present in Linux since version 1.3.57. It originated in
+-4.4BSD. Only Linux has the
++call has been present in Linux since version 1.3.57.
++It originated in
++4.4BSD.
++Only Linux has the
+ .I /proc/sys
+ mirror, and the object naming schemes differ between Linux and 4.4BSD,
+ but the declaration of the
+@@ -141,10 +109,51 @@
+ Use the
+ .I /proc/sys
+ interface instead.
+-.br
++.PP
+ Not all available objects are properly documented.
+-.br
++.PP
+ It is not yet possible to change operating system by writing to
+ .IR /proc/sys/kernel/ostype .
++.SH EXAMPLE
++.nf
++#define _GNU_SOURCE
++#include <unistd.h>
++#include <sys/syscall.h>
++#include <string.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <linux/sysctl.h>
++
++int _sysctl(struct __sysctl_args *args );
++
++#define OSNAMESZ 100
++
++int
++main(void)
++{
++    struct __sysctl_args args;
++    char osname[OSNAMESZ];
++    size_t osnamelth;
++    int name[] = { CTL_KERN, KERN_OSTYPE };
++
++    memset(&args, 0, sizeof(struct __sysctl_args));
++    args.name = name;
++    args.nlen = sizeof(name)/sizeof(name[0]);
++    args.oldval = osname;
++    args.oldlenp = &osnamelth;
++ 
++    osnamelth = sizeof(osname);
++    
++    if (syscall(SYS__sysctl, &args) == -1) {
++        perror("_sysctl");
++        exit(EXIT_FAILURE);
++    }
++    printf("This machine is running %*s\\n", osnamelth, osname);
++    exit(EXIT_SUCCESS);
++}
++.fi
++.SH NOTES
++Glibc does not provide a wrapper for this system call; call it using
++.BR syscall (2).
+ .SH "SEE ALSO"
+ .BR proc (5)
+diff -ur man-pages-2.39/man2/syslog.2 man-pages-2.55/man2/syslog.2
+--- man-pages-2.39/man2/syslog.2	2006-03-16 01:50:08.000000000 +0100
++++ man-pages-2.55/man2/syslog.2	2007-05-26 17:22:28.000000000 +0200
+@@ -8,7 +8,7 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+@@ -16,39 +16,30 @@
+ .\" have taken the same level of care in the production of this manual,
+ .\" which is licensed free of charge, as they might when working
+ .\" professionally.
+-.\" 
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+ .\" Written 11 June 1995 by Andries Brouwer <aeb@cwi.nl>
+-.TH SYSLOG 2  2001-11-25 "Linux 1.2.9" "Linux Programmer's Manual"
++.TH SYSLOG 2  2007-06-01 "Linux 1.2.9" "Linux Programmer's Manual"
+ .SH NAME
+-syslog, klogctl \- read and/or clear kernel message ring buffer; set console_loglevel
++syslog, klogctl \- read and/or clear kernel message ring buffer;
++set console_loglevel
+ .SH SYNOPSIS
+ .nf
++.BI "int syslog(int " type ", char *" bufp ", int " len );
++.B  "                /* No wrapper provided in glibc */
++.sp
+ /* The glibc interface */
+ .br
+ .B "#include <sys/klog.h>"
+ .sp
+ .BI "int klogctl(int " type ", char *" bufp ", int " len );
+-.sp
+-/* The handcrafted system call */
+-.br
+-.B #include <unistd.h>
+-.br
+-.B #include <linux/unistd.h>
+-.br
+-.B #include <errno.h>
+-.sp
+-.B _syscall3(int, syslog, int, type, char *, bufp, int, len)
+-          /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+-.sp
+-.BI "int syslog(int " type ", char *" bufp ", int " len );
+ .fi
+ .SH DESCRIPTION
+ If you need the libc function
+-.BR syslog (),
+-(that talks to
++.BR syslog ()
++(which talks to
+ .BR syslogd (8)),
+ then look at
+ .BR syslog (3).
+@@ -86,15 +77,19 @@
+ The kernel has a cyclic buffer of length LOG_BUF_LEN
+ (4096, since 1.3.54: 8192, since 2.1.113: 16384; in recent kernels
+ the size can be set at compile time) in which messages given as argument
+-to the kernel function \fIprintk\fP() are stored
++to the kernel function 
++.BR printk ()
++are stored
+ (regardless of their loglevel).
+ 
+ The call
+ .BR syslog ()
+ .RI (2, buf , len )
+ waits until this kernel log buffer is nonempty, and then reads
+-at most \fIlen\fP bytes into the buffer \fIbuf\fP. It returns
+-the number of bytes read. Bytes read from the log disappear from
++at most \fIlen\fP bytes into the buffer \fIbuf\fP.
++It returns
++the number of bytes read.
++Bytes read from the log disappear from
+ the log buffer: the information can only be read once.
+ This is the function executed by the kernel when a user program
+ reads
+@@ -120,7 +115,9 @@
+ 
+ .B The loglevel
+ .br
+-The kernel routine \fIprintk\fP() will only print a message on the
++The kernel routine
++.BR printk ()
++will only print a message on the
+ console, if it has a loglevel less than the value of the variable
+ .IR console_loglevel .
+ This variable initially has the value DEFAULT_CONSOLE_LOGLEVEL (7),
+@@ -136,10 +133,12 @@
+ with \fItype\fP equal to 6 or 7, set it to 1 (kernel panics only)
+ or 7 (all except debugging messages), respectively.
+ 
+-Every text line in a message has its own loglevel. This level is
++Every text line in a message has its own loglevel.
++This level is
+ DEFAULT_MESSAGE_LOGLEVEL \- 1 (6) unless the line starts with <d>
+ where \fId\fP is a digit in the range 1-7, in which case the level
+-is \fId\fP. The conventional meaning of the loglevel is defined in
++is \fId\fP.
++The conventional meaning of the loglevel is defined in
+ .I <linux/kernel.h>
+ as follows:
+ 
+@@ -153,10 +152,12 @@
+ #define KERN_INFO     "<6>"  /* informational                    */
+ #define KERN_DEBUG    "<7>"  /* debug-level messages             */
+ .fi
+-
+ .SH "RETURN VALUE"
+-In case of error, \-1 is returned, and \fIerrno\fP is set. Otherwise,
+-for \fItype\fP equal to 2, 3 or 4, \fBsyslog\fP() returns the number
++In case of error, \-1 is returned, and \fIerrno\fP is set.
++Otherwise,
++for \fItype\fP equal to 2, 3 or 4,
++.BR syslog ()
++returns the number
+ of bytes read, and otherwise 0.
+ .SH ERRORS
+ .TP
+@@ -181,6 +182,5 @@
+ .BR SYS_klog .
+ In glibc 2.0 the syscall is baptised
+ .BR klogctl ().
+-
+ .SH "SEE ALSO"
+ .BR syslog (3)
+diff -ur man-pages-2.39/man2/tkill.2 man-pages-2.55/man2/tkill.2
+--- man-pages-2.39/man2/tkill.2	2007-06-18 17:16:18.000000000 +0200
++++ man-pages-2.55/man2/tkill.2	2007-06-20 18:37:11.000000000 +0200
+@@ -9,7 +9,7 @@
+ .\" manual under the conditions for verbatim copying, provided that the
+ .\" entire resulting derived work is distributed under the terms of a
+ .\" permission notice identical to this one.
+-.\" 
++.\"
+ .\" Since the Linux kernel and libraries are constantly changing, this
+ .\" manual page may be incorrect or out-of-date.  The author(s) assume no
+ .\" responsibility for errors or omissions, or for damages resulting from
+@@ -17,43 +17,39 @@
+ .\" have taken the same level of care in the production of this manual,
+ .\" which is licensed free of charge, as they might when working
+ .\" professionally.
+-.\" 
++.\"
+ .\" Formatted or processed versions of this manual, if unaccompanied by
+ .\" the source, must acknowledge the copyright and authors of this work.
+ .\"
+ .\" 2004-05-31, added tgkill, ahu, aeb
+ .\"
+-.TH TKILL 2 "2004-05-31" "Linux 2.6.6" "Linux Programmer's Manual"
++.TH TKILL 2 2007-06-01 "Linux 2.6.6" "Linux Programmer's Manual"
+ .SH NAME
+ tkill \- send a signal to a single process
+ .SH SYNOPSIS
+ .nf
+-.B #include <sys/types.h>
+-.br
+-.B #include <linux/unistd.h>
+-.br
+-.B #include <errno.h>
+-.sp
+-.B "_syscall2(int, tkill, int, tid, int, sig)"
+-          /* Using \fBsyscall\fP(2) may be preferable; see \fBintro\fP(2) */
+-.sp
+-.B int tkill(int tid, int sig);
+-.sp
++.BI "int tkill(int " tid ", int " sig );
+ .fi
+ .SH DESCRIPTION
+-The \fBtkill\fP() system call is analogous to
++The
++.BR tkill ()
++system call is analogous to
+ .BR kill (2),
+ except when the specified process is part of a thread group
+ (created by specifying the CLONE_THREAD flag in the call to clone).
+ Since all the processes in a thread group have the same PID,
+-they cannot be individually signalled with \fBkill\fP().
+-With \fBtkill\fP(), however, one can address each process
++they cannot be individually signalled with
++.BR kill (2).
++With
++.BR tkill (),
++however, one can address each process
+ by its unique TID.
+ .PP
+ These are the raw system call interfaces, meant for internal
+ thread library use.
+ .SH "RETURN VALUE"
+-On success, zero is returned. On error, \-1 is returned, and \fIerrno\fP
++On success, zero is returned.
++On error, \-1 is returned, and \fIerrno\fP
+ is set appropriately.
+ .SH ERRORS
+ .TP
+@@ -61,17 +57,22 @@
+ An invalid TID or signal was specified.
+ .TP
+ .B EPERM
+-Permission denied. For the required permissions, see
++Permission denied.
++For the required permissions, see
+ .BR kill (2).
+ .TP
+ .B ESRCH
+ No process with the specified thread ID (and thread group ID) exists.
++.SH VERSIONS
++.BR tkill ()
++is supported since Linux 2.4.19 / 2.5.4.
+ .SH "CONFORMING TO"
+-\fBtkill\fP() is Linux specific and should not be used
++.BR tkill ()
++is Linux specific and should not be used
+ in programs that are intended to be portable.
+-.SH VERSIONS
+-\fBtkill\fP() is supported since Linux 2.4.19 / 2.5.4.
++.SH NOTES
++Glibc does not provide wrapper for these system calls; call them using
++.BR syscall (2).
+ .SH "SEE ALSO"
+ .BR gettid (2),
+-.BR kill (2),
+-.BR tgkill (2)
++.BR kill (2)

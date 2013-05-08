@@ -1,0 +1,576 @@
+--- man-pages-2.39/man2/splice.2.pom	2006-10-13 11:03:17.000000000 +0200
++++ man-pages-2.39/man2/splice.2	2006-09-18 14:35:34.000000000 +0200
+@@ -0,0 +1,218 @@
++.\" Hey Emacs! This file is -*- nroff -*- source.
++.\"
++.\" This manpage is Copyright (C) 2006 Jens Axboe
++.\" and Copyright (C) 2006 Michael Kerrisk <mtk-manpages@gmx.net>
++.\"
++.\" Permission is granted to make and distribute verbatim copies of this
++.\" manual provided the copyright notice and this permission notice are
++.\" preserved on all copies.
++.\"
++.\" Permission is granted to copy and distribute modified versions of this
++.\" manual under the conditions for verbatim copying, provided that the
++.\" entire resulting derived work is distributed under the terms of a
++.\" permission notice identical to this one.
++.\" 
++.\" Since the Linux kernel and libraries are constantly changing, this
++.\" manual page may be incorrect or out-of-date.  The author(s) assume no
++.\" responsibility for errors or omissions, or for damages resulting from
++.\" the use of the information contained herein.  The author(s) may not
++.\" have taken the same level of care in the production of this manual,
++.\" which is licensed free of charge, as they might when working
++.\" professionally.
++.\" 
++.\" Formatted or processed versions of this manual, if unaccompanied by
++.\" the source, must acknowledge the copyright and authors of this work.
++.\"
++.TH splice 2 2006-04-28 "Linux 2.6.17" "Linux Programmer's Manual"
++.SH NAME
++splice \- splice data to/from a pipe
++.SH SYNOPSIS
++.nf
++.B #define _GNU_SOURCE
++.B #include <fcntl.h>
++
++.BI "long splice(int " fd_in ", off_t *" off_in ", int " fd_out , 
++.BI "            off_t *" off_out ", size_t " len \
++", unsigned int " flags );
++.fi
++.SH DESCRIPTION
++.BR splice ()
++moves data between two file descriptors 
++without copying between kernel address space and user address space.
++It transfers up to
++.I len
++bytes of data from the file descriptor
++.I fd_in
++to the file descriptor
++.IR fd_out ,
++where one of the descriptors must refer to a pipe. 
++
++If
++.I in_fd
++refers to a pipe, then
++.I in_off 
++must be NULL.
++If
++.I in_fd 
++does not refer to a pipe and
++.I in_off
++is NULL, then bytes are read from 
++.I in_fd
++starting from the current file offset,
++and the current file offset is adjusted appropriately.
++If
++.I in_fd 
++does not refer to a pipe and
++.I in_off
++is not NULL, then 
++.I in_off
++must point to a buffer which specifies the starting
++offset from which bytes will be read from
++.IR in_fd ;
++in this case, the current file offset of
++.IR in_fd 
++is not changed.
++Analogous statements apply for
++.I out_fd
++and
++.IR out_off .
++
++The
++.I flags
++argument is a bit mask that is composed by ORing together
++zero or more of the following values:
++.TP 1.9i
++.B SPLICE_F_MOVE
++Attempt to move pages instead of copying. 
++This is only a hint to the kernel:
++pages may still be copied if the kernel cannot move the 
++pages from the pipe, or if
++the pipe buffers don't refer to full pages.
++.TP
++.B SPLICE_F_NONBLOCK
++Do not block on I/O.
++This makes the splice pipe operations non-blocking, but 
++.BR splice ()
++may nevertheless block because the file descriptors that
++are spliced to/from may block (unless they have the
++.BR O_NONBLOCK
++flag set).
++.TP
++.B SPLICE_F_MORE
++More data will be coming in a subsequent splice.
++This is a helpful hint when
++the 
++.I fd_out
++refers to a socket (see also the description of
++.B MSG_MORE
++in
++.BR send (2),
++and the description of
++.B TCP_CORK
++in
++.BR tcp (7))
++.TP
++.B SPLICE_F_GIFT
++Unused for
++.BR splice ();
++see
++.BR vmsplice (2).
++.SH RETURN VALUE
++Upon successful completion,
++.BR splice ()
++returns the number of bytes
++spliced to or from the pipe. 
++A return value of 0 means that there was no data to transfer, 
++and it would not make sense to block, because there are no 
++writers connected to the write end of the pipe referred to by 
++.IR fd_in .
++
++On error, 
++.BR splice ()
++returns \-1 and
++.I errno
++is set to indicate the error.
++.SH ERRORS
++.TP
++.B EBADF
++One or both file descriptors are not valid, 
++or do not have proper read-write mode.
++.TP
++.B EINVAL
++Target file system doesn't support splicing;
++neither of the descriptors refers to a pipe; or 
++offset given for non-seekable device.
++.TP
++.B ENOMEM
++Out of memory.
++.TP
++.B ESPIPE
++Either 
++.I off_in
++or 
++.I off_out
++was not NULL, but the corresponding file descriptor refers to a pipe.
++.SH HISTORY
++The
++.BR splice (2)
++system call first appeared in Linux-2.6.17.
++.SH NOTES
++The three system calls
++.BR splice (2),
++.BR vmsplice (2),
++and
++.BR tee (2)),
++provide userspace programs with full control over an arbitrary 
++kernel buffer, implemented within the kernel using the same type
++of buffer that is used for a pipe.  
++In overview, these system calls perform the following tasks:
++.TP 1.2i
++.BR splice ()
++moves data from the buffer to an arbitrary file descriptor, or vice versa,
++or from one buffer to another.
++.TP
++.BR tee ()
++"copies" the data from one buffer to another.
++.TP
++.BR vmsplice () 
++"copies" data from user space into the buffer.
++.PP
++Though we talk of copying, actual copies are generally avoided.
++The kernel does this by implementing a pipe buffer as a set 
++of reference-counted pointers to pages of kernel memory.
++The kernel creates "copies" of pages in a buffer by creating new 
++pointers (for the output buffer) referring to the pages, 
++and increasing the reference counts for the pages: 
++only pointers are copied, not the pages of the buffer.
++.\"
++.\" Linus: Now, imagine using the above in a media server, for example. 
++.\" Let's say that a year or two has passed, so that the video drivers 
++.\" have been updated to be able to do the splice thing, and what can 
++.\" you do? You can:
++.\" 
++.\" - splice from the (mpeg or whatever - let's just assume that the video
++.\"   input is either digital or does the encoding on its own - like they
++.\"   pretty much all do) video input into a pipe (remember: no copies - the
++.\"   video input will just DMA directly into memory, and splice will just 
++.\"   set up the pages in the pipe buffer)
++.\" - tee that pipe to split it up
++.\" - splice one end to a file (ie "save the compressed stream to disk")
++.\" - splice the other end to a real-time video decoder window for your 
++.\"   real-time viewing pleasure.
++.\"
++.\" Linus: Now, the advantage of splice()/tee() is that you can 
++.\" do zero-copy movement of data, and unlike sendfile() you can 
++.\" do it on _arbitrary_ data (and, as shown by "tee()", it's more 
++.\" than just sending the data to somebody else: you can duplicate 
++.\" the data and choose to forward it to two or more different 
++.\" users - for things like logging etc).
++.\"
++.SH EXAMPLE
++See
++.BR tee (2).
++.SH "CONFORMING TO"
++This system call is Linux specific.
++.SH SEE ALSO
++.BR sendfile (2),
++.BR splice (2),
++.BR tee (2)
+--- man-pages-2.39/man2/tee.2.pom	2006-10-13 11:03:27.000000000 +0200
++++ man-pages-2.39/man2/tee.2	2006-09-18 14:35:34.000000000 +0200
+@@ -0,0 +1,195 @@
++.\" Hey Emacs! This file is -*- nroff -*- source.
++.\"
++.\" This manpage is Copyright (C) 2006 Jens Axboe
++.\" and Copyright (C) 2006 Michael Kerrisk <mtk-manpages@gmx.net>
++.\"
++.\" Permission is granted to make and distribute verbatim copies of this
++.\" manual provided the copyright notice and this permission notice are
++.\" preserved on all copies.
++.\"
++.\" Permission is granted to copy and distribute modified versions of this
++.\" manual under the conditions for verbatim copying, provided that the
++.\" entire resulting derived work is distributed under the terms of a
++.\" permission notice identical to this one.
++.\" 
++.\" Since the Linux kernel and libraries are constantly changing, this
++.\" manual page may be incorrect or out-of-date.  The author(s) assume no
++.\" responsibility for errors or omissions, or for damages resulting from
++.\" the use of the information contained herein.  The author(s) may not
++.\" have taken the same level of care in the production of this manual,
++.\" which is licensed free of charge, as they might when working
++.\" professionally.
++.\" 
++.\" Formatted or processed versions of this manual, if unaccompanied by
++.\" the source, must acknowledge the copyright and authors of this work.
++.\"
++.TH tee 2 2006-04-28 "Linux 2.6.17" "Linux Programmer's Manual"
++.SH NAME
++tee \- duplicating pipe content
++.SH SYNOPSIS
++.nf
++.B #define _GNU_SOURCE
++.B #include <fcntl.h>
++
++.BI "long tee(int " fd_in ", int " fd_out ", size_t " len \
++", unsigned int " flags );
++.fi
++.SH DESCRIPTION
++.\" Example programs http://brick.kernel.dk/snaps
++.\"
++.\"
++.\" add a "tee(in, out1, out2)" system call that duplicates the pages 
++.\" (again, incrementing their reference count, not copying the data) from 
++.\" one pipe to two other pipes.
++.BR tee ()
++duplicates up to
++.I len
++bytes of data from the pipe referred to by the file descriptor
++.I fd_in
++to the pipe referred to by the file descriptor
++.IR fd_out .
++It does not consume the data that is duplicated from
++.IR fd_in ; 
++therefore, that data can be copied by a subsequent 
++.BR splice (2).
++
++.I flags
++is a series of modifier flags, which share the name space with
++.BR splice (2)
++and
++.BR vmsplice (2):
++.TP 1.9i
++.B SPLICE_F_MOVE
++Currently has no effect for 
++.BR tee ();
++see
++.BR splice (2).
++.TP
++.B SPLICE_F_NONBLOCK
++Do not block on I/O; see 
++.BR splice (2) 
++for further details.
++.TP
++.B SPLICE_F_MORE
++Currently has no effect for 
++.BR tee (),
++but may be implemented in the future; see
++.BR splice (2).
++.TP
++.B SPLICE_F_GIFT
++Unused for
++.BR tee ();
++see
++.BR vmsplice (2).
++.SH RETURN VALUE
++Upon successful completion,
++.BR tee ()
++returns the number of bytes that were duplicated between the input
++and output. 
++A return value of 0 means that there was no data to transfer, 
++and it would not make sense to block, because there are no 
++writers connected to the write end of the pipe referred to by 
++.IR fd_in .
++
++On error, 
++.BR tee ()
++returns \-1 and
++.I errno
++is set to indicate the error.
++.SH ERRORS
++.TP 
++.B EINVAL
++.I fd_in
++or
++.I fd_out
++does not refer to a pipe; or
++.I fd_in
++and
++.I fd_out
++refer to the same pipe.
++.TP
++.B ENOMEM
++Out of memory.
++.SH NOTES
++Conceptually,
++.BR tee ()
++copies the data between the two pipes.
++In reality no real data copying takes place though:
++under the covers,
++.BR tee ()
++assigns data in the output by merely grabbing 
++a reference to the input.
++.SH EXAMPLE
++The following example implements a basic
++.BR tee (1)
++program using the
++.BR tee (2)
++system call. 
++.nf
++
++#define _GNU_SOURCE
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <assert.h>
++#include <errno.h>
++#include <limits.h>
++
++int
++main(int argc, char *argv[])
++{
++    int fd;
++    int len, slen;
++
++    assert(argc == 2);
++
++    fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
++    if (fd == -1) {
++        perror("open");
++        exit(EXIT_FAILURE);
++    }
++
++    do {
++        /*
++         * tee stdin to stdout.
++         */
++        len = tee(STDIN_FILENO, STDOUT_FILENO,
++                  INT_MAX, SPLICE_F_NONBLOCK);
++
++        if (len < 0) {
++            if (errno == EAGAIN)
++                continue;
++            perror("tee");
++            exit(EXIT_FAILURE);
++        } else
++            if (len == 0)
++                break;
++
++        /*
++         * Consume stdin by splicing it to a file.
++         */
++        while (len > 0) {
++            slen = splice(STDIN_FILENO, NULL, fd, NULL,
++                          len, SPLICE_F_MOVE);
++            if (slen < 0) {
++                perror("splice");
++                break;
++            }
++            len -= slen;
++        }
++    } while (1);
++
++    close(fd);
++    exit(EXIT_SUCCESS);
++}
++.fi
++.SH HISTORY
++The
++.BR tee (2)
++system call first appeared in Linux-2.6.17.
++.SH "CONFORMING TO"
++This system call is Linux specific.
++.SH SEE ALSO
++.BR splice (2),
++.BR vmsplice (2)
+--- man-pages-2.39/man2/vmsplice.2.pom	2006-10-13 11:03:35.000000000 +0200
++++ man-pages-2.39/man2/vmsplice.2	2006-09-18 14:35:34.000000000 +0200
+@@ -0,0 +1,154 @@
++.\" Hey Emacs! This file is -*- nroff -*- source.
++.\"
++.\" This manpage is Copyright (C) 2006 Jens Axboe
++.\" and Copyright (C) 2006 Michael Kerrisk <mtk-manpages@gmx.net>
++.\"
++.\" Permission is granted to make and distribute verbatim copies of this
++.\" manual provided the copyright notice and this permission notice are
++.\" preserved on all copies.
++.\"
++.\" Permission is granted to copy and distribute modified versions of this
++.\" manual under the conditions for verbatim copying, provided that the
++.\" entire resulting derived work is distributed under the terms of a
++.\" permission notice identical to this one.
++.\" 
++.\" Since the Linux kernel and libraries are constantly changing, this
++.\" manual page may be incorrect or out-of-date.  The author(s) assume no
++.\" responsibility for errors or omissions, or for damages resulting from
++.\" the use of the information contained herein.  The author(s) may not
++.\" have taken the same level of care in the production of this manual,
++.\" which is licensed free of charge, as they might when working
++.\" professionally.
++.\" 
++.\" Formatted or processed versions of this manual, if unaccompanied by
++.\" the source, must acknowledge the copyright and authors of this work.
++.\"
++.TH vmsplice 2 2006-04-28 "Linux 2.6.17" "Linux Programmer's Manual"
++.SH NAME
++vmsplice \- splice user pages into a pipe
++.SH SYNOPSIS
++.nf
++.B #define _GNU_SOURCE
++.B #include <fcntl.h>
++.B #include <sys/uio.h>
++
++.BI "long vmsplice(int " fd ", const struct iovec *" iov , 
++.BI "              unsigned long " nr_segs ", unsigned int " flags );
++.fi
++.SH DESCRIPTION
++.\" Linus: vmsplice() system call to basically do a "write to 
++.\" the buffer", but using the reference counting and VM traversal 
++.\" to actually fill the buffer. This means that the user needs to 
++.\" be careful not to re-use the user-space buffer it spliced into 
++.\" the kernel-space one (contrast this to "write()", which copies 
++.\" the actual data, and you can thus re-use the buffer immediately 
++.\" after a successful write), but that is often easy to do.  
++The
++.BR vmsplice ()
++system call maps
++.I nr_segs
++ranges of user memory described by
++.I iov
++into a pipe. 
++The file descriptor
++.I fd 
++must refer to a pipe.
++
++The pointer
++.I iov
++points to an array of
++.I iovec
++structures as defined in
++.IR <sys/uio.h> :
++
++.in +0.25i
++.nf
++struct iovec {
++    void  *iov_base;            /* Starting address */
++    size_t iov_len;             /* Number of bytes */
++};
++.in -0.25i
++.fi
++
++The
++.I flags
++argument is a bit mask that is composed by ORing together
++zero or more of the following values:
++.TP 1.9i
++.B SPLICE_F_MOVE
++Unused for
++.BR vmsplice ();
++see
++.BR splice (2).
++.TP
++.B SPLICE_F_NONBLOCK
++.\" Not used for vmsplice
++.\" May be in the future -- therefore EAGAIN
++Do not block on I/O; see 
++.BR splice (2) 
++for further details.
++.TP
++.B SPLICE_F_MORE
++Currently has no effect for 
++.BR vmsplice (),
++but may be implemented in the future; see
++.BR splice (2).
++.TP
++.B SPLICE_F_GIFT
++The user pages are a gift to the kernel. 
++The application may not modify this memory ever, 
++.\" FIXME Explain the following line in a little more detail:
++or page cache and on-disk data may differ. 
++Gifting pages to the kernel means that a subsequent
++.BR splice ()
++.B SPLICE_F_MOVE
++can successfully move the pages;
++if this flag is not specified, then a subsequent
++.BR splice ()
++.B SPLICE_F_MOVE
++must copy the pages.
++Data must also be properly page aligned, both in memory and length.
++.\" .... if we expect to later SPLICE_F_MOVE to the cache.
++.SH RETURN VALUE
++Upon successful completion,
++.BR vmsplice ()
++returns the number of bytes transferred to the pipe. 
++On error, 
++.BR vmplice ()
++returns \-1 and
++.I errno
++is set to indicate the error.
++.SH ERRORS
++.TP
++.B EBADF
++.I fd
++either not valid, or doesn't refer to a pipe.
++.TP
++.B EINVAL
++.I nr_segs
++is 0 or greater than
++.BR IOV_MAX; 
++or memory not aligned if
++.B SPLICE_F_GIFT
++set.
++.TP
++.B ENOMEM
++Out of memory.
++.SH NOTES
++.BR vmsplice ()
++follows the other vectorized read/write type functions when it comes to
++limitations on number of segments being passed in. 
++This limit is
++.B IOV_MAX
++as defined in
++.IR <limits.h> .
++At the time of this writing, that limit is 1024.
++.SH HISTORY
++The
++.BR vmsplice (2)
++system call first appeared in Linux-2.6.17.
++.SH "CONFORMING TO"
++This system call is Linux specific.
++.SH SEE ALSO
++.BR splice (2),
++.BR tee (2)

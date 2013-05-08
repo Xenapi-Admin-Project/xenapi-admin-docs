@@ -1,0 +1,104 @@
+diff -up man-pages-2.39/man2/fcntl.2.pom man-pages-2.39/man2/fcntl.2
+--- man-pages-2.39/man2/fcntl.2.pom	2010-04-23 09:20:36.000000000 +0200
++++ man-pages-2.39/man2/fcntl.2	2010-04-23 10:26:31.000000000 +0200
+@@ -950,4 +950,4 @@ are Linux specific.
+ .BR feature_test_macros (7)
+ .P
+ See also locks.txt, mandatory.txt, and dnotify.txt in
+-/usr/src/linux/Documentation.
++/usr/share/doc/kernel-doc-2.6.18/Documentation.
+diff -up man-pages-2.39/man2/flock.2.pom man-pages-2.39/man2/flock.2
+--- man-pages-2.39/man2/flock.2.pom	2010-04-23 09:20:36.000000000 +0200
++++ man-pages-2.39/man2/flock.2	2010-04-23 10:26:06.000000000 +0200
+@@ -207,4 +207,4 @@ There are also
+ and
+ .I mandatory.txt
+ in
+-.IR /usr/src/linux/Documentation .
++.IR /usr/share/doc/kernel-doc-2.6.18/Documentation .
+diff -up man-pages-2.39/man2/sigreturn.2.pom man-pages-2.39/man2/sigreturn.2
+diff -up man-pages-2.39/man3/lockf.3.pom man-pages-2.39/man3/lockf.3
+--- man-pages-2.39/man3/lockf.3.pom	2010-04-23 09:20:52.000000000 +0200
++++ man-pages-2.39/man3/lockf.3	2010-04-23 10:24:24.000000000 +0200
+@@ -127,4 +127,4 @@ There are also
+ and
+ .I mandatory.txt
+ in
+-.IR /usr/src/linux/Documentation .
++.IR /usr/share/doc/kernel-doc-2.6.18/Documentation .
+diff -up man-pages-2.39/man4/rtc.4.pom man-pages-2.39/man4/rtc.4
+--- man-pages-2.39/man4/rtc.4.pom	2010-04-23 09:21:20.000000000 +0200
++++ man-pages-2.39/man4/rtc.4	2010-04-23 10:43:12.000000000 +0200
+@@ -222,4 +222,4 @@ and 2069.
+ .BR adjtimex (2),
+ .BR gmtime (3),
+ .BR time (7),
+-/usr/src/linux/Documentation/rtc.txt
++/usr/share/doc/kernel-doc-2.6.18/Documentation/rtc.txt
+diff -up man-pages-2.39/man4/sk98lin.4.pom man-pages-2.39/man4/sk98lin.4
+--- man-pages-2.39/man4/sk98lin.4.pom	2010-04-23 09:21:20.000000000 +0200
++++ man-pages-2.39/man4/sk98lin.4	2010-04-23 10:43:34.000000000 +0200
+@@ -426,7 +426,7 @@ are designed to operate in configuration
+ .br
+ The statistics file of a particular interface of an adapter card. It contains generic information about the adapter card plus a detailed summary of all transmit and receive counters.
+ .TP
+-.I /usr/src/linux/Documentation/network/sk98lin.txt
++.I /usr/share/doc/kernel-doc-2.6.18/Documentation/network/sk98lin.txt
+ .br
+ This is the
+ .IR README
+diff -up man-pages-2.39/man7/bootparam.7.pom man-pages-2.39/man7/bootparam.7
+--- man-pages-2.39/man7/bootparam.7.pom	2010-04-23 09:21:21.000000000 +0200
++++ man-pages-2.39/man7/bootparam.7	2010-04-23 10:44:56.000000000 +0200
+@@ -351,7 +351,7 @@ These days ram disks use the buffer cach
+ For a lot of information (e.g., how to use
+ .BR rdev (8)
+ in conjunction with the new ramdisk setup), see
+-.IR /usr/src/linux/Documentation/ramdisk.txt .
++.IR /usr/share/doc/kernel-doc-2.6.18/Documentation/ramdisk.txt .
+ 
+ There are four parameters, two boolean and two integral.
+ 
+@@ -383,7 +383,7 @@ and the initrd filesystem is moved over 
+ the usual boot sequence (e.g. invocation of /sbin/init) is performed.
+ 
+ For a detailed description of the initrd feature, see
+-.IR /usr/src/linux/Documentation/initrd.txt .
++.IR /usr/share/doc/kernel-doc-2.6.18/Documentation/initrd.txt .
+ 
+ The `noinitrd' option tells the kernel that although it was compiled for
+ operation with initrd, it should not go through the above steps, but
+@@ -806,7 +806,7 @@ xd=2,5,0x320,3
+ 
+ .SH "IBM MCA BUS DEVICES"
+ See also
+-.IR /usr/src/linux/Documentation/mca.txt .
++.IR /usr/share/doc/kernel-doc-2.6.18/Documentation/mca.txt .
+ 
+ .SS "PS/2 ESDI hard disks"
+ It is possible to specify the desired geometry at boot time:
+@@ -1115,7 +1115,7 @@ Syntax:
+ riscom=iobase1[,iobase2[,iobase3[,iobase4]]]
+ .LP
+ More details can be found in
+-.IR /usr/src/linux/Documentation/riscom8.txt .
++.IR /usr/share/doc/kernel-doc-2.6.18/Documentation/riscom8.txt .
+ 
+ .SS "The DigiBoard Driver (`digi=')"
+ If this option is used, it should have precisely six parameters.
+@@ -1140,7 +1140,7 @@ digi=E,PC/Xi,D,16,200,D0000
+ digi=1,0,0,16,0x200,851968
+ .LP
+ More details can be found in
+-.IR /usr/src/linux/Documentation/digiboard.txt .
++.IR /usr/share/doc/kernel-doc-2.6.18/Documentation/digiboard.txt .
+ 
+ .SS "The Baycom Serial/Parallel Radio Modem"
+ Syntax:
+@@ -1235,4 +1235,4 @@ Large parts of this man page have been d
+ Boot Parameter HOWTO (version 1.0.1) written by Paul Gortmaker.
+ More information may be found in this (or a more recent) HOWTO.
+ An up-to-date source of information is
+-.IR /usr/src/linux/Documentation/kernel-parameters.txt .
++.IR /usr/share/doc/kernel-doc-2.6.18/Documentation/kernel-parameters.txt .
+diff -up man-pages-2.39/man7/hier.7.pom man-pages-2.39/man7/hier.7

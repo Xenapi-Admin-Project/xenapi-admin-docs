@@ -1,0 +1,14 @@
+diff -up man-pages-2.39/man2/open.2.pom man-pages-2.39/man2/open.2
+--- man-pages-2.39/man2/open.2.pom	2006-08-03 15:57:17.000000000 +0200
++++ man-pages-2.39/man2/open.2	2008-07-07 14:22:26.000000000 +0200
+@@ -163,8 +163,8 @@ or
+ data is guaranteed to have been transferred.
+ Under Linux 2.4 transfer sizes, and the alignment of user buffer
+ and file offset must all be multiples of the logical block size
+-of the file system. Under Linux 2.6 alignment to 512-byte boundaries
+-suffices.
++of the file system. Under Linux 2.6 alignment must fit the block
++size of the device.
+ .\" Alignment should satisfy requirements for the underlying device
+ .\" There may be coherency problems.
+ .sp

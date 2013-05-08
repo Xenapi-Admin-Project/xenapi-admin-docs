@@ -1,0 +1,59 @@
+--- man-pages-2.13/man2/io_setup.2.aio	2005-10-19 08:54:38.000000000 +0200
++++ man-pages-2.13/man2/io_setup.2	2005-11-10 09:47:39.213699696 +0100
+@@ -27,10 +27,10 @@
+ .ad l
+ .hy 0
+ 
+-#include <linux/aio.h>
++#include <libaio.h>
+ .sp
+ .HP 15
+-long\ \fBio_setup\fR\ (unsigned\ \fInr_events\fR, aio_context_t\ \fI*ctxp\fR);
++int\ \fBio_setup\fR\ (int\ \fImaxevents\fR, io_context_t\ \fI*ctxp\fR);
+ .ad
+ .hy
+ 
+@@ -38,7 +38,7 @@
+ 
+ .PP
+ \fBio_setup\fR() creates an asynchronous I/O context capable of receiving 
+-at least \fInr_events\fR. 
++at least \fImaxevents\fR. 
+ \fIctxp\fR must not point to an AIO context that already exists, and must 
+ be initialized to 0 prior to the call. 
+ On successful creation of the AIO context, \fI*ctxp\fR is filled in 
+@@ -54,8 +54,8 @@
+ 
+ .TP
+ EINVAL
+-\fIctxp\fR is not initialized, or the specified \fInr_events\fR 
+-exceeds internal limits. \fInr_events\fR should be greater than 0.
++\fIctxp\fR is not initialized, or the specified \fImaxevents\fR 
++exceeds internal limits. \fImaxevents\fR should be greater than 0.
+ 
+ .TP
+ EFAULT
+@@ -67,7 +67,7 @@
+ 
+ .TP
+ EAGAIN
+-The specified \fInr_events\fR exceeds the user's limit of available events.
++The specified \fImaxevents\fR exceeds the user's limit of available events.
+ 
+ .TP
+ ENOSYS
+--- man-pages-2.13/man2/io_destroy.2.aio	2005-10-19 08:54:38.000000000 +0200
++++ man-pages-2.13/man2/io_destroy.2	2005-11-10 09:48:20.626404008 +0100
+@@ -27,10 +27,10 @@
+ .ad l
+ .hy 0
+ 
+-#include <linux/aio.h>
++#include <libaio.h>
+ .sp
+ .HP 17
+-long\ \fBio_destroy\fR\ (aio_context_t\ \fIctx\fR);
++int\ \fBio_destroy\fR\ (io_context_t\ \fIctx\fR);
+ .ad
+ .hy
+ 

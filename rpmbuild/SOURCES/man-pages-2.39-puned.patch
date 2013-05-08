@@ -1,0 +1,11 @@
+--- man-pages-2.39/man3/dlopen.3.puned	2006-08-11 10:24:33.000000000 +0200
++++ man-pages-2.39/man3/dlopen.3	2006-08-14 18:37:19.000000000 +0200
+@@ -370,7 +370,7 @@
+     dlerror();    /* Clear any existing error */
+ .\" This is the (somewhat ugly) POSIX.1-2003 (TC1) fix for
+ .\" the dlsym() casting problem
+-    *(void **) (&cosine) = dlsym(handle, "cos");
++    cosine = dlsym(handle, "cos");
+     if ((error = dlerror()) != NULL)  {
+         fprintf (stderr, "%s\en", error);
+         exit(1);

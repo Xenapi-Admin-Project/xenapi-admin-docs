@@ -1,0 +1,14 @@
+--- man-pages-1.67/man5/fs.5.fs	2001-12-09 00:05:03.000000000 +0100
++++ man-pages-1.67/man5/fs.5	2005-03-07 11:15:58.000000000 +0100
+@@ -71,7 +71,10 @@
+ .TP
+ .B ext3
+ is a journaling version of the ext2 filesystem. It is easy to
+-switch back and forth between ext2 and ext3.
++switch back and forth between ext2 and ext3. ext3 offers the most
++complete set of journaling options available among journaling
++filesystems.
++.\"----------------------------------------------------------------------
+ .TP
+ .B xiafs
+ was designed and implemented to be a stable, safe filesystem by

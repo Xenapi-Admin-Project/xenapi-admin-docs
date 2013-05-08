@@ -1,0 +1,11 @@
+--- man-pages-1.60/man3/re_comp.3.orig	2003-08-28 16:15:37.000000000 -0400
++++ man-pages-1.60/man3/re_comp.3	2003-08-28 16:16:22.000000000 -0400
+@@ -26,6 +26,8 @@
+ .SH NAME
+ re_comp, re_exec \- BSD regex functions
+ .SH SYNOPSIS
++.B #define _REGEX_RE_COMP
++.br
+ .B #include <sys/types.h>
+ .br
+ .B #include <regex.h>

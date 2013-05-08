@@ -1,0 +1,68 @@
+diff -up man-pages-2.39/man2/statfs64.2.pom man-pages-2.39/man2/statfs64.2
+--- man-pages-2.39/man2/statfs64.2.pom	2004-05-25 22:47:16.000000000 -0400
++++ man-pages-2.39/man2/statfs64.2	2009-10-19 09:33:14.000000000 -0400
+@@ -1,63 +1 @@
+-.\" Copyright (C) 2004 IBM Corporation
+-.\" This file is distributed according to the GNU General Public License.
+-.\" See the file COPYING in the top level source directory for details.
+-.\"
+- 
+-.de Sh \" Subsection
+-.br
+-.if t .Sp
+-.ne 5
+-.PP
+-\fB\\$1\fR
+-.PP
+-..
+-.de Sp \" Vertical space (when we can't use .PP)
+-.if t .sp .5v
+-.if n .sp
+-..
+-.de Ip \" List item
+-.br
+-.ie \\n(.$>=3 .ne \\$3
+-.el .ne 3
+-.IP "\\$1" \\$2
+-..
+-.TH "STATFS64,FSTATFS64" 2 "2004-March-12" "Linux 2.6" "Linux Programmer's Guide"
+-.SH NAME
+-statfs64,fstatfs64 \- Get file system statistics
+-.SH "SYNOPSIS"
+-.ad l
+-.hy 0
+-.HP 15
+-long\ \fBstatfs64\fR\ (const\ char\ \fI*path\fR, size_t\ \fIsz\fR, struct\ statfs64\ \fI*buf\fR);
+-.HP 16
+-long\ \fBfstatfs64\fR\ (unsigned\ int\ \fIfd\fR, size_t\ \fIsz\fR, struct\ statfs64\ \fI*buf\fR);
+-.ad
+-.hy
+-
+-.SH "DESCRIPTION"
+-
+-.PP
+-\fBstatfs64\fR and \fBfstatfs64\fR get file system statistics. For \fBstatfs\fR, \fIpath\fR is the path name of a file in the mounted file system in question. Alternatively, \fBfstatfs\fR can pass a file descriptor in an open file in the \fIfd\fR parameter and get similar information. \fIbuf\fR is a \fBstatfs\fR pointer structure that contains information about the file system, such as type and free blocks.
+-
+-.SH "RETURN VALUE"
+-
+-.PP
+-\fBstatfs64\fR and \fBfstatfs64\fR return 0 on success. Otherwise, they return one of the errors listed in the "Errors" section.
+-
+-.SH "ERRORS"
+-
+-.TP
+-EINVAL, EFAULT
+-An invalid address for \fIbuf\fR was specified.
+-
+-.TP
+-EBADF
+-An invalid file descriptor, \fIfd\fR, was specified. \fIfd\fR is applicable to \fBfstatfs\fR only.
+-
+-.SH "SEE ALSO"
+-.BR stat(2),
+-.BR statvfs(2)
+-\fB\fR 
+-
+-.SH AUTHOR
+-Niki Rahimi 
++.so man2/statfs.2

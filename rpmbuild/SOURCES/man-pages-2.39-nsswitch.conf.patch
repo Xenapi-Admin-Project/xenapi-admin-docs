@@ -1,0 +1,17 @@
+diff -up man-pages-2.39/man5/nsswitch.conf.5.nsswitch.conf man-pages-2.39/man5/nsswitch.conf.5
+--- man-pages-2.39/man5/nsswitch.conf.5.nsswitch.conf	2009-10-19 10:33:06.516927955 +0200
++++ man-pages-2.39/man5/nsswitch.conf.5	2009-10-19 10:48:24.080797453 +0200
+@@ -44,9 +44,11 @@ file.
+ The following databases are available in the NSS:
+ .TP
+ .B aliases
+-Mail aliases, used by
++Mail aliases, provide a system-wide mechanism to redirect mail for local
++recipients. Used by mail transfer agents such as Postfix or
+ .BR sendmail (8).
+-Presently ignored.
++Note: On Linux, unlike on other Unixes, Sendmail uses its own aliases
++resolution system independent of `/etc/nsswitch.conf' by default.
+ .TP
+ .B ethers
+ Ethernet numbers.

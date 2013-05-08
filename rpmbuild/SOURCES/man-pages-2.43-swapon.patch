@@ -1,0 +1,19 @@
+--- man-pages-2.43/man2/swapon.2.pom	2007-01-29 13:58:32.000000000 +0100
++++ man-pages-2.43/man2/swapon.2	2007-01-29 14:22:04.000000000 +0100
+@@ -134,9 +134,13 @@
+ .B EPERM
+ The caller does not have the
+ .B CAP_SYS_ADMIN
+-capability, or all
+-.B MAX_SWAPFILES
+-(earlier 8; 32 since Linux 2.4.10) are in use.
++capability or the maximal number of swap files has been reached.
++(The maximum is
++.BR MAX_SWAPFILES-2 "(30) if " CONFIG_MIGRATION " is enabled, " MAX_SWAPFILES
++(32) otherwise.
++In Linux kernel versions prior to 2.4.10, the maximum was always
++.BR MAX_SWAPFILES ,
++which was 8.
+ .SH "CONFORMING TO"
+ These functions are Linux specific and should not be used in programs
+ intended to be portable.

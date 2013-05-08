@@ -1,0 +1,27 @@
+--- man-pages-2.25/man3/malloc.3.pom	2006-03-16 10:56:03.000000000 +0100
++++ man-pages-2.25/man3/malloc.3	2006-03-16 11:21:15.428524576 +0100
+@@ -159,13 +159,17 @@
+ with the same argument, or overruns of a single byte (off-by-one
+ bugs).  Not all such errors can be protected against, however, and
+ memory leaks can result.
+-If
+-.BR MALLOC_CHECK_
+-is set to 0, any detected heap corruption is silently ignored;
+-if set to 1, a diagnostic is printed on stderr;
+-if set to 2,
+-.BR abort ()
+-is called immediately.  This can be useful because otherwise
++If 
++.BR MALLOC_CHECK_ 
++is set to 0, any detected heap corruption is silently ignored and 
++an error message is not generated; 
++if set to 1, the error message is printed on stderr, but the program 
++is not aborted; 
++if set to 2, 
++.BR abort() 
++is called immediately, but the error message is not generated; 
++if set to 3, the error message is printed on stderr and program is aborted.
++This can be useful because otherwise
+ a crash may happen much later, and the true cause for the problem
+ is then very hard to track down.
+ .SH BUGS

@@ -1,0 +1,65 @@
+diff -up man-pages-2.39/man1/iconv.1.pom2 man-pages-2.39/man1/iconv.1
+--- man-pages-2.39/man1/iconv.1.pom2	2010-07-23 05:14:00.000000000 -0400
++++ man-pages-2.39/man1/iconv.1	2010-07-23 05:23:11.000000000 -0400
+@@ -190,32 +190,54 @@
+ .SH "NAME"
+ iconv \- Convert encoding of given files from one encoding to another
+ .SH "SYNOPSIS"
+-iconv \fB\-f\fR \fIencoding\fR \fB\-t\fR \fIencoding\fR \fIinputfile\fR
++\fBiconv\fR [-lcs?V] [-f \fIENCODING\fR] [-t \fIENCODING\fR] [-o \fIFILE\fR] [--from-code=\fIENCODING\fR] [--to-code=\fIENCODING\fR] [--list] [--output=\fIFILE\fR] [--silent] [--verbose] [--help] [--usage] [--version] [inputfile...]\fR
+ .SH "DESCRIPTION"
+ The \fBiconv\fR program converts the encoding of characters in
+ \fIinputfile\fR from one coded character set to another. The result is
+ written to standard output unless otherwise specified by the
+ \fB--output\fR option.
+ .PP
+-\fB--from-code\fR, \fB\-f\fR \fIencoding\fR
++\fB--from-code\fR=\fIENCODING\fR, \fB\-f\fR \fIENCODING\fR
+ .PP
+-Convert characters from \fIencoding\fR
++Convert characters from encoding
+ .PP
+-\fB--to-code\fR, \fB\-t\fR \fIencoding\fR
++\fB--to-code\fR=\fIENCODING\fR, \fB\-t\fR \fIENCODING\fR
++
+ .PP
+-Convert characters to \fIencoding\fR
++Convert characters to encoding
+ .PP
+-\fB--list\fR
++\fB--list\fR, \fB\-l\fR 
+ .PP
+ List known coded character sets
+ .PP
+-\fB--output\fR, \fB\-o\fR \fIfile\fR
++\fB--output\fR=\fIFILE\fR, \fB\-o\fR \fIFILE\fR
+ .PP
+ Specify output file (instead of stdout)
+ .PP
++\fB-c\fR
++.PP
++Omit invalid characters from output.
++.PP
++\fB--silent\fR, \fB\-s\fR    
++.PP
++Suppress warnings
++.PP
+ \fB--verbose\fR
+ .PP
+ Print progress information.
++.PP
++\fB --help\fR, \fB-?\fR
++.PP
++Give a help list.
++.PP      
++\fB --usage\fR
++.PP
++Give a short usage message.
++.PP  
++\fB --version\fR, \fB-V\fR
++.PP
++Print program version.
++.PP
+ .SH "AUTHOR"
+ iconv is written by Ulrich Drepper as part of the GNU C Library.
+ .PP

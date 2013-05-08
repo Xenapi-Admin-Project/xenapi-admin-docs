@@ -1,0 +1,20 @@
+--- man-pages-2.39/man2/connect.2.stokes	2007-11-20 08:41:34.000000000 -0500
++++ man-pages-2.39/man2/connect.2	2007-11-20 08:42:12.000000000 -0500
+@@ -147,14 +147,8 @@
+ .I sa_family
+ field.
+ .TP
+-.B EAGAIN
+-No more free local ports or insufficient entries in the routing cache. For
+-.B PF_INET
+-see the 
+-.B net.ipv4.ip_local_port_range
+-sysctl in 
+-.BR ip (7) 
+-on how to increase the number of local ports.
++.B EADDRNOTAVAIL
++Non-existent interface was requested or the requested address was not local.
+ .TP
+ .B EALREADY
+ The socket is non-blocking and a previous connection attempt has not yet
+

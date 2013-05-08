@@ -1,0 +1,12 @@
+--- man-pages-2.34/man3/inet.3.pom	2006-06-29 12:28:00.000000000 +0200
++++ man-pages-2.34/man3/inet.3	2006-06-29 12:40:04.000000000 +0200
+@@ -70,7 +70,8 @@
+ (255.255.255.255), and \fBinet_aton\fP() provides a cleaner way
+ to indicate error return.
+ .PP
+-The \fBinet_network\fP() function extracts the network number in
++The \fBinet_network\fP() function extracts 
++a number suitable for use as an Internet address in
+ host byte order from the address \fIcp\fP in numbers-and-dots
+ notation.  If the input is invalid, \-1 is returned.
+ .PP

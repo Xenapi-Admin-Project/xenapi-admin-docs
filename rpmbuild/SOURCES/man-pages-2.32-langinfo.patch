@@ -1,0 +1,9 @@
+--- man-pages-2.32/man3/setlocale.3.sl	2006-02-07 21:57:53.000000000 +0100
++++ man-pages-2.32/man3/setlocale.3	2006-05-15 09:52:19.000000000 +0200
+@@ -187,4 +187,5 @@
+ .BR strcoll (3),
+ .BR strftime (3),
+ .BR charsets (4),
+-.BR locale (7)
++.BR locale (7),
++.BR nl_langinfo (3)

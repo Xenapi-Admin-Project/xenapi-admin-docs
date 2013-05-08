@@ -1,0 +1,11 @@
+--- man-pages-2.32/man5/termcap.5.t	2006-02-12 23:23:18.000000000 +0100
++++ man-pages-2.32/man5/termcap.5	2006-05-15 09:45:58.000000000 +0200
+@@ -448,6 +448,6 @@
+ The values in parentheses are suggested defaults which are used by curses,
+ if the capabilities are missing.
+ .SH "SEE ALSO"
+-.BR curses (3),
+-.BR termcap (3),
++.BR ncurses (3),
++.BR curs_termcap (3),
+ .BR terminfo (5)

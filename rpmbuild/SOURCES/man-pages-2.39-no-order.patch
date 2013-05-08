@@ -1,0 +1,33 @@
+diff -up man-pages-2.39/man5/host.conf.5.no-order man-pages-2.39/man5/host.conf.5
+--- man-pages-2.39/man5/host.conf.5.no-order	2011-10-19 18:32:23.000000000 +0200
++++ man-pages-2.39/man5/host.conf.5	2011-10-20 14:05:49.000000000 +0200
+@@ -32,16 +32,10 @@ The file
+ contains configuration information specific to the resolver library.
+ It should contain one configuration keyword per line, followed by
+ appropriate configuration information.  The keywords recognized are
+-.IR order ", " trim ", " multi ", " nospoof ", " spoof ", and " reorder .
++.IR trim ", " multi ", " nospoof ", " spoof ", and " reorder .
+ These keywords are described below.
+ 
+ .TP
+-.I order
+-This keyword specifies how host lookups are to be performed.  It
+-should be followed by one or more lookup methods, separated by commas.
+-Valid methods are
+-.IR bind ", " hosts ", and " nis .
+-.TP
+ .I trim 
+ This keyword may be listed more than once.  Each time it should be
+ followed by a list of domains, separated by colons (`:'), semicolons
+@@ -132,11 +126,6 @@ override the behavior which is configure
+ If set this variable points to a file that should be read instead of
+ .IR /etc/host.conf .
+ .TP
+-.B RESOLV_SERV_ORDER
+-Overrides the
+-.I order
+-command.
+-.TP
+ .B RESOLV_SPOOF_CHECK
+ Overrides the
+ .IR nospoof ", " spoofalert " and " spoof

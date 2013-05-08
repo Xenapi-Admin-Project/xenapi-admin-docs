@@ -1,0 +1,11 @@
+--- man-pages-2.32/man2/shmget.2.shm	2006-05-02 05:00:05.000000000 +0200
++++ man-pages-2.32/man2/shmget.2	2006-05-15 09:41:37.000000000 +0200
+@@ -91,6 +91,8 @@
+ .I shmflg
+ is composed of:
+ .TP 12
++.B SHM_HUGETLB
++used for allocating HUGETLB pages for shared memory.
+ .B IPC_CREAT
+ to create a new segment. If this flag is not used, then 
+ .BR shmget ()
