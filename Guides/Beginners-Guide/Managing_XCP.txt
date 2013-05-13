@@ -1,0 +1,53 @@
+Managing XCP
+
+Currently there are four ways to manage XCP hosts.
+
+1. commandline via xe
+
+There are over 300 xe commands available to manage XCP.
+Use "xe help --all" to see the entire list of xe commands.
+
+The commands are broken into the following groups. Some of them may not be available depending on the version of XCP:
+
+xe appliance-*: appliance commands
+xe bond-*: bond commands
+xe cd-*: cd commands
+xe gpu-group-*: GPU group commands
+xe host-*: host commands
+xe log-*: log commands
+xe network-*: network commands
+xe pool-*: pool commands
+xe sr-*: storage repository commands
+xe vbd-*: virtual block device commands
+xe vdi-*: virtual disk image commands
+xe vm-*: virtual machine commands
+
+2. xsconsole
+
+To use xsconsole, type "xsconsole" on the command line. It displays a menu that lists the options to view system information and add a host to a resource pool, for example. 
+
+To ensure that xsconsole will run without errors, maximize the size of the terminal.
+
+Use the arrow keys to navigate or scroll down to "Quit" to exit xsconsole.
+
+3. XenCenter
+
+XenCenter is installed on Windows operating systems only.
+
+XenCenter can be downloaded from the third-party website at http://citrix-xencenter.software.informer.com/. Click on the large green rectangle on the left that says “Trusted Download” to start the downloading process.
+
+Once XenCenter is installed, run the program and add an XCP host to manage.
+
+An XCP host can be added to XenCenter in two ways:
+
+a. From the home screen (?), click on the server image that says "Add..."
+
+b. From the menu, click on Server --> Add...
+
+Then type the IP address or hostname of the XCP on the local network. (What about remote?)
+
+4. XenWebManager
+
+- How to install it (look at Grant's tutorial)
+- How to install the appliance
+- How to set it up
