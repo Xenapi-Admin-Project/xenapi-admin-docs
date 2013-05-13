@@ -1,6 +1,6 @@
 Managing XCP
 
-Currently there are four ways to manage XCP hosts.
+Currently there are multiple ways to manage XCP hosts.
 
 1. commandline via xe
 
@@ -51,3 +51,7 @@ Then type the IP address or hostname of the XCP on the local network. (What abou
 - How to install it (look at Grant's tutorial)
 - How to install the appliance
 - How to set it up
+
+5. XenOrchestra
+
+Check out the XenOrchestra website at https://xen-orchestra.com/ on how to set up this Web GUI for Xen XAPI.
